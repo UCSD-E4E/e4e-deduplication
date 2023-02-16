@@ -27,13 +27,15 @@ def _get_args() -> Tuple[Path, Path, Path]:
     return directory_path, cache_path, report_path
 
 
-def _generate_cache(directory: Directory, cache: Cache):
+def _generate_cache(directory: Directory, cache: Cache) -> None:
     for file in directory:
         print(file.path)
         cache.add_or_update_file(file)
 
+    cache.commit()
 
-def main():
+
+def main() -> None:
     """
     Entry point for the CLI.
     """
