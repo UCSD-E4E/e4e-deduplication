@@ -18,7 +18,7 @@ class Cache:
         self._path = path
         self._root = root
         self._temp_dir = TemporaryDirectory()
-        self._temp_path = Path(self._temp_dir, path.name)
+        self._temp_path = Path(self._temp_dir.name, path.name)
 
         self._connection: Connection = None
         self._cursor: Cursor = None

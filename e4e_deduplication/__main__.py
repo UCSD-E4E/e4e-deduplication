@@ -28,9 +28,12 @@ def _get_args() -> Tuple[Path, Path, Path]:
 
 
 def _generate_cache(directory: Directory, cache: Cache) -> None:
-    for file in directory:
+    for idx, file in enumerate(directory):
         print(file.path)
         cache.add_or_update_file(file)
+
+        if idx % 10:
+            cache.commit()
 
     cache.commit()
 
