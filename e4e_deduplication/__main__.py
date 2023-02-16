@@ -30,9 +30,7 @@ def _get_args() -> Tuple[Path, Path, Path]:
 def _generate_cache(directory: Directory, cache: Cache):
     for file in directory:
         print(file.path)
-        cache.add_or_update_file(file, commit=False)
-
-    cache.commit()
+        cache.add_or_update_file(file)
 
 
 def main():

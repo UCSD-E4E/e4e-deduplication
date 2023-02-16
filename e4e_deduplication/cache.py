@@ -61,16 +61,13 @@ class Cache:
     def add_or_update_file(self, file: File, commit=True) -> None:
         """
         Adds or updates the specified File object in the cache.
-        Only commits to file if commit==True.
-        If commit==False, ensure to call .commit() separately.
         """
         if self._item_in_cache(file):
             self._update_item(file)
         else:
             self._add_item(file)
 
-        if commit:
-            self.commit()
+        self._connection.commit()
 
     def get_duplicates(self) -> List[List[File]]:
         """
@@ -92,9 +89,3 @@ class Cache:
             for _, v in files_by_checksum.items()
             if len(v) > 1
         ]
-
-    def commit(self) -> None:
-        """
-        Commits the cache to file.
-        """
-        self._connection.commit()
