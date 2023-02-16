@@ -33,7 +33,7 @@ class Cache:
 
         self._cursor.execute(
             """CREATE TABLE IF NOT EXISTS files
-            (name text, path text, size int, mtime float, checksum text)"""
+            (name text, path text, size int, mtime float, checksum text, seen integer)"""
         )
 
         self._connection.commit()
@@ -48,7 +48,7 @@ class Cache:
 
     def _item_in_cache(self, file: File) -> bool:
         results = self._cursor.execute(
-            "SELECT name, path, size, mtime, checksum FROM files WHERE path = ?",
+            "SELECT name, path, size, mtime, checksum, seen FROM files WHERE path = ?",
             (file.path,),
         )
 
@@ -56,17 +56,17 @@ class Cache:
 
     def _add_item(self, file: File) -> None:
         self._cursor.execute(
-            "INSERT INTO files VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO files VALUES (?, ?, ?, ?, ?, 1)",
             (file.name, file.path, file.size, file.mtime, file.checksum),
         )
 
     def _update_item(self, file: File) -> None:
         results = self._cursor.execute(
-            "SELECT name, path, size, mtime, checksum FROM files WHERE path = ?",
+            "SELECT name, path, size, mtime, checksum, seen FROM files WHERE path = ?",
             (file.path,),
         )
 
-        _, _, _, mtime, _ = list(results)[0]
+        _, _, _, mtime, _, _ = list(results)[0]
         if mtime == file.mtime:
             return
 
@@ -74,7 +74,8 @@ class Cache:
             """UPDATE files
                 SET size = ?,
                     mtime = ?,
-                    checksum = ?
+                    checksum = ?,
+                    seen = 1
                 WHERE path = ?;""",
             (file.size, file.mtime, file.checksum, file.path),
         )
@@ -98,11 +99,11 @@ class Cache:
         Gets a list of all of the duplicate file objects in the cache.
         """
         results = self._cursor.execute(
-            "SELECT name, path, size, mtime, checksum FROM files"
+            "SELECT name, path, size, mtime, checksum, seen FROM files"
         )
 
         files_by_checksum: Dict[str, List[str]] = {}
-        for _, path, _, _, checksum in results:
+        for _, path, _, _, checksum, _ in results:
             if checksum not in files_by_checksum:
                 files_by_checksum[checksum] = []
 
@@ -113,6 +114,15 @@ class Cache:
             for _, v in files_by_checksum.items()
             if len(v) > 1
         ]
+
+    def clear_deleted(self) -> None:
+        """
+        Removes files that were not seen this run.
+        That means they were deleted or renamed.
+        """
+        self._cursor.execute("DELETE FROM files WHERE seen = 0")
+
+        self.commit()
 
     def commit(self) -> None:
         """

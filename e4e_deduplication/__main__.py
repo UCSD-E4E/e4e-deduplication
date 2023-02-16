@@ -39,6 +39,7 @@ def _generate_cache(directory: Directory, cache: Cache) -> None:
         if idx % 10:
             cache.commit()
 
+    cache.clear_deleted()
     cache.commit()
 
 
