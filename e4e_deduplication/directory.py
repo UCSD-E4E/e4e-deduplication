@@ -17,7 +17,7 @@ class Directory:  # pylint: disable=too-few-public-methods
         self._file_iterator = None
         self._root = root if root else self._path
 
-    def _get_files(self) -> Generator[Path, None, None]:
+    def _get_files(self) -> Generator[File, None, None]:
         for path in self._path.iterdir():
             if path.is_dir():
                 for file in Directory(path.absolute(), root=self._root.absolute()):
@@ -27,5 +27,5 @@ class Directory:  # pylint: disable=too-few-public-methods
             else:
                 raise NotImplementedError
 
-    def __iter__(self) -> Generator[Path, None, None]:
+    def __iter__(self) -> Generator[File, None, None]:
         return self._get_files()
