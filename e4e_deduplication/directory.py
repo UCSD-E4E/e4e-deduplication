@@ -24,7 +24,9 @@ class Directory:  # pylint: disable=too-few-public-methods
                 continue
 
             if path.is_dir():
-                for file in Directory(path.absolute(), root=self._root.absolute()):
+                for file in Directory(
+                    path.absolute(), self._excluded_files, root=self._root.absolute()
+                ):
                     yield file
             elif path.is_file():
                 yield File(path.absolute(), self._root.absolute())
