@@ -4,10 +4,10 @@ Generates a report.csv file containing the duplicate items.
 
 from pathlib import Path
 
-from cache import Cache
+from e4e_deduplication.cache import Cache
 
 
-class Report:
+class Report:  # pylint: disable=too-few-public-methods
     """
     Generates a report.csv file containing the duplicate items.
     """
@@ -22,9 +22,9 @@ class Report:
         """
         duplicates = self._cache.get_duplicates()
 
-        with open(self._path.absolute(), "w", encoding="utf8") as f:
+        with open(self._path.absolute(), "w", encoding="utf8") as file:
             for duplicate in duplicates:
                 for item in duplicate:
-                    f.write(f"{item.path}, ")
+                    file.write(f"{item.path}, ")
 
-                f.write("\n")
+                file.write("\n")

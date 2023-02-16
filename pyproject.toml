@@ -9,6 +9,7 @@ packages = [{include = "e4e_deduplication"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 black = "^23.1.0"
+pylint = "^2.16.2"
 
 
 [build-system]

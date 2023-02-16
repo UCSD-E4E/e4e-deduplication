@@ -47,9 +47,10 @@ class File:
     @property
     def checksum(self) -> str:
         """
-        Gets a sha256 checksum.  This is recacluated everytime this function is called in case it changes.
+        Gets a sha256 checksum.
+        This is recacluated everytime this function is called in case it changes.
         """
-        with open(self._path, "rb") as f:
-            checksum = hashlib.file_digest(f, "sha256")
+        with open(self._path, "rb") as file:
+            checksum = hashlib.file_digest(file, "sha256")
 
         return checksum.hexdigest()

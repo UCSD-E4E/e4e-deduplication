@@ -6,7 +6,7 @@ from pathlib import Path
 from sqlite3 import connect
 from typing import Dict, List
 
-from file import File
+from e4e_deduplication.file import File
 
 
 class Cache:
@@ -45,7 +45,7 @@ class Cache:
             (file.path,),
         )
 
-        _, _, _, mtime, _ = [r for r in results][0]
+        _, _, _, mtime, _ = list(results)[0]
         if mtime == file.mtime:
             return
 
