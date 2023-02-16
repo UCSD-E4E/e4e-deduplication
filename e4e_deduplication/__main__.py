@@ -3,6 +3,7 @@ Provides a cli around the E4E deduplication module.
 """
 from argparse import ArgumentParser
 from pathlib import Path
+from time import perf_counter
 from typing import Tuple
 
 from e4e_deduplication.cache import Cache
@@ -31,12 +32,19 @@ def _get_args() -> Tuple[Path, Path, Path]:
     return directory_path, cache_path, report_path, set(args.exclude.split(","))
 
 
+def seconds_to_minutes(seconds: float):
+    return seconds / 60
+
+
 def _generate_cache(directory: Directory, cache: Cache) -> None:
-    for idx, file in enumerate(directory):
+    start_time = perf_counter()
+    for file in directory:
         print(file.path)
         cache.add_or_update_file(file)
 
-        if idx % 10:
+        # Commit every 10 minutes
+        if seconds_to_minutes(start_time - perf_counter()) >= 10:
+            start_time = perf_counter()
             cache.commit()
 
     cache.clear_deleted()
