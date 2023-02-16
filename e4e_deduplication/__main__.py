@@ -20,9 +20,9 @@ def _get_args() -> Tuple[Path, Path, Path]:
     )
 
     args = parser.parse_args()
-    directory_path = args.directory
-    cache_path = Path(directory_path, "checksums.db")
-    report_path = Path(directory_path, "report.csv")
+    directory_path = args.directory.absolute()
+    cache_path = Path(directory_path, "checksums.db").absolute()
+    report_path = Path(directory_path, "report.csv").absolute()
 
     return directory_path, cache_path, report_path
 
@@ -41,13 +41,13 @@ def main() -> None:
     """
     directory_path, cache_path, report_path = _get_args()
 
-    cache = Cache(cache_path.absolute(), directory_path.absolute())
-    directory = Directory(directory_path.absolute())
+    directory = Directory(directory_path)
 
-    _generate_cache(directory, cache)
+    with Cache(cache_path, directory_path) as cache:
+        _generate_cache(directory, cache)
 
-    report = Report(report_path.absolute(), cache)
-    report.generate()
+        report = Report(report_path, cache)
+        report.generate()
 
 
 if __name__ == "__main__":

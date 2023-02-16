@@ -1,9 +1,10 @@
 """
 Represents a database to keep track of checksums between runs.
 """
-
 from pathlib import Path
-from sqlite3 import connect
+from shutil import copyfile
+from sqlite3 import Connection, Cursor, connect
+from tempfile import TemporaryDirectory
 from typing import Dict, List
 
 from e4e_deduplication.file import File
@@ -13,9 +14,20 @@ class Cache:
     """
     Represents a database to keep track of checksums between runs."""
 
-    def __init__(self, path: str, root: str) -> None:
+    def __init__(self, path: Path, root: Path) -> None:
+        self._path = path
         self._root = root
-        self._connection = connect(path)
+        self._temp_dir = TemporaryDirectory()
+        self._temp_path = Path(self._temp_dir, path.name)
+
+        self._connection: Connection = None
+        self._cursor: Cursor = None
+
+    def __enter__(self):
+        if self._path.exists():
+            copyfile(self._path, self._temp_path)
+
+        self._connection = connect(self._temp_path)
         self._cursor = self._connection.cursor()
 
         self._cursor.execute(
@@ -24,6 +36,12 @@ class Cache:
         )
 
         self._connection.commit()
+
+    def __exit__(self):
+        self.commit()
+        self._cursor.close()
+
+        self._temp_dir.cleanup()
 
     def _item_in_cache(self, file: File) -> bool:
         results = self._cursor.execute(
@@ -98,3 +116,4 @@ class Cache:
         Commits the cache to file.
         """
         self._connection.commit()
+        copyfile(self._temp_path, self._path)
