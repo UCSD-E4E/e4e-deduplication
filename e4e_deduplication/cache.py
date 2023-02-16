@@ -120,5 +120,8 @@ class Cache:
         """
         self._connection.commit()
         copyfile(self._temp_path, self._backup)
-        self._path.unlink()
+
+        if self._path.exists():
+            self._path.unlink()
+
         self._backup.rename(self._path)
