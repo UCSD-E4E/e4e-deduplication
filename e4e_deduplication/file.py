@@ -2,8 +2,7 @@
 Represents a file.
 """
 
-import os
-from hashlib import sha256
+import hashlib
 from pathlib import Path
 
 
@@ -50,13 +49,7 @@ class File:
         """
         Gets a sha256 checksum.  This is recacluated everytime this function is called in case it changes.
         """
-
-        checksum = sha256()
-        with open(self._path.absolute(), "rb") as f:
-            while True:
-                buf = f.read(2**20)
-                if not buf:
-                    break
-                checksum.update(buf)
+        with open(self._path, "rb") as f:
+            checksum = hashlib.file_digest(f, "sha256")
 
         return checksum.hexdigest()

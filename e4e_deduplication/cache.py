@@ -2,6 +2,7 @@
 Represents a database to keep track of checksums between runs.
 """
 
+from pathlib import Path
 from sqlite3 import connect
 from typing import Dict, List
 
@@ -87,7 +88,7 @@ class Cache:
             files_by_checksum[checksum].append(path)
 
         return [
-            [File(f"{self._root}/{f}", self._root) for f in v]
+            [File(Path(self._root, f), self._root) for f in v]
             for _, v in files_by_checksum.items()
             if len(v) > 1
         ]
