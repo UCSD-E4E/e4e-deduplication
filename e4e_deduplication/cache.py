@@ -23,7 +23,7 @@ class Cache:
         self._connection: Connection = None
         self._cursor: Cursor = None
 
-    def __enter__(self) -> None:
+    def __enter__(self):
         if self._path.exists():
             copyfile(self._path, self._temp_path)
 
@@ -36,6 +36,8 @@ class Cache:
         )
 
         self._connection.commit()
+
+        return self
 
     def __exit__(self, *args) -> None:
         self.commit()
