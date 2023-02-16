@@ -1,15 +1,23 @@
+"""
+Represents a Directory.  Can be iterated over.
+"""
 from pathlib import Path
+from typing import Generator
 
 from file import File
 
 
 class Directory:
-    def __init__(self, path: str, root: str = None):
-        self._path = Path(path)
-        self._file_iterator = None
-        self._root = Path(root) if root else self._path
+    """
+    Represents a Directory.  Can be iterated over.
+    """
 
-    def _get_files(self):
+    def __init__(self, path: Path, root: Path = None):
+        self._path = path
+        self._file_iterator = None
+        self._root = root if root else self._path
+
+    def _get_files(self) -> Generator[Path, None, None]:
         for p in self._path.iterdir():
             if p.is_dir():
                 for f in Directory(p.absolute(), root=self._root.absolute()):
@@ -19,5 +27,5 @@ class Directory:
             else:
                 raise NotImplementedError
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[Path, None, None]:
         return self._get_files()

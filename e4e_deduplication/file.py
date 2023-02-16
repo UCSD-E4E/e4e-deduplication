@@ -1,31 +1,56 @@
+"""
+Represents a file.
+"""
+
 import os
 from hashlib import sha256
 from pathlib import Path
 
 
 class File:
-    def __init__(self, path: str, root: str):
-        self._path = Path(path)
-        self._root = Path(root)
+    """
+    Represents a file.
+    """
+
+    def __init__(self, path: Path, root: Path) -> None:
+        self._path = path
+        self._root = root
 
     @property
-    def size(self):
-        return os.path.getsize(self._path)
+    def size(self) -> int:
+        """
+        File size in bytes.
+        """
+        return self._path.lstat().st_size
 
     @property
-    def name(self):
+    def name(self) -> str:
+        """
+        The name of the file.
+        """
         return self._path.name
 
     @property
-    def path(self):
-        return f'./{"/".join(self._path.relative_to(self._root).parts)}'
+    def path(self) -> str:
+        """
+        The path to the file relative to the root directory.
+        This is also the path that will be relative to the cache.db
+        """
+        return self._path.relative_to(self._root).as_posix()
 
     @property
-    def mtime(self):
-        return os.path.getmtime(self._path)
+    def mtime(self) -> float:
+        """
+        Gets the last modified time.
+        """
+        return self._path.lstat().st_mtime
 
     @property
-    def checksum(self):
+    def checksum(self) -> str:
+        """
+        Gets a sha256 checksum.  This is recacluated everytime this function is called in case it changes.
+        """
+
         checksum = sha256()
         with open(self._path.absolute(), "rb") as f:
             while True:

@@ -1,11 +1,18 @@
+"""
+Represents a database to keep track of checksums between runs.
+"""
+
 from sqlite3 import connect
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from file import File
 
 
 class Cache:
-    def __init__(self, path: str, root: str):
+    """
+    Represents a database to keep track of checksums between runs."""
+
+    def __init__(self, path: str, root: str) -> None:
         self._root = root
         self._connection = connect(path)
         self._cursor = self._connection.cursor()
@@ -17,7 +24,7 @@ class Cache:
 
         self._connection.commit()
 
-    def _item_in_cache(self, file: File):
+    def _item_in_cache(self, file: File) -> bool:
         results = self._cursor.execute(
             "SELECT name, path, size, mtime, checksum FROM files WHERE path = ?",
             (file.path,),
@@ -25,13 +32,13 @@ class Cache:
 
         return any(results)
 
-    def _add_item(self, file: File):
+    def _add_item(self, file: File) -> None:
         self._cursor.execute(
             "INSERT INTO files VALUES (?, ?, ?, ?, ?)",
             (file.name, file.path, file.size, file.mtime, file.checksum),
         )
 
-    def _update_item(self, file: File):
+    def _update_item(self, file: File) -> None:
         results = self._cursor.execute(
             "SELECT name, path, size, mtime, checksum FROM files WHERE path = ?",
             (file.path,),
@@ -50,7 +57,12 @@ class Cache:
             (file.size, file.mtime, file.checksum, file.path),
         )
 
-    def add_or_update_file(self, file: File, commit=True):
+    def add_or_update_file(self, file: File, commit=True) -> None:
+        """
+        Adds or updates the specified File object in the cache.
+        Only commits to file if commit==True.
+        If commit==False, ensure to call .commit() separately.
+        """
         if self._item_in_cache(file):
             self._update_item(file)
         else:
@@ -59,7 +71,10 @@ class Cache:
         if commit:
             self.commit()
 
-    def get_duplicates(self):
+    def get_duplicates(self) -> List[List[File]]:
+        """
+        Gets a list of all of the duplicate file objects in the cache.
+        """
         results = self._cursor.execute(
             "SELECT name, path, size, mtime, checksum FROM files"
         )
@@ -77,5 +92,8 @@ class Cache:
             if len(v) > 1
         ]
 
-    def commit(self):
+    def commit(self) -> None:
+        """
+        Commits the cache to file.
+        """
         self._connection.commit()

@@ -1,18 +1,19 @@
 from argparse import ArgumentParser
 from pathlib import Path
+from typing import Tuple
 
 from cache import Cache
 from directory import Directory
 from report import Report
 
 
-def _get_args():
+def _get_args() -> Tuple[Path, Path, Path]:
     parser = ArgumentParser(
         description="Looks through a single directory and generates a list of duplicate files."
     )
 
     parser.add_argument(
-        "-d", "--directory", type=str, required=True, help="The directory to work on."
+        "-d", "--directory", type=Path, required=True, help="The directory to work on."
     )
 
     args = parser.parse_args()
