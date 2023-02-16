@@ -16,6 +16,7 @@ class Cache:
 
     def __init__(self, path: Path, root: Path) -> None:
         self._path = path
+        self._backup = Path(path.parent, f"{path.name}.bak")
         self._root = root
         self._temp_dir = TemporaryDirectory()
         self._temp_path = Path(self._temp_dir.name, path.name)
@@ -118,4 +119,6 @@ class Cache:
         Commits the cache to file.
         """
         self._connection.commit()
-        copyfile(self._temp_path, self._path)
+        copyfile(self._temp_path, self._backup)
+        self._path.unlink()
+        self._backup.rename(self._path)
