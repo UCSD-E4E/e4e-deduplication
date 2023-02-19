@@ -14,7 +14,7 @@ poetry install --no-root
 
 ## How to execute
 ```
-poetry run e4e_deduplication --directory <directory to test>
+poetry run python e4e_deduplication --directory <directory to test>
 ```
 
 This will produce a CSV where each line represents a set of duplicates.

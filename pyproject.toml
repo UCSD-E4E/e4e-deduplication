@@ -8,6 +8,7 @@ packages = [{include = "e4e_deduplication"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+py7zr = "^0.20.4"
 
 [tool.poetry.dev-dependencies]
 black = "^23.1.0"

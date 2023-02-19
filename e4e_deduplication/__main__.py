@@ -26,7 +26,7 @@ def _get_args() -> Tuple[Path, Path, Path]:
 
     args = parser.parse_args()
     directory_path = args.directory.absolute()
-    cache_path = Path(directory_path, "checksums.db").absolute()
+    cache_path = Path(directory_path, "checksums.db.7z").absolute()
     report_path = Path(directory_path, "report.csv").absolute()
 
     return directory_path, cache_path, report_path, set(args.exclude.split(","))

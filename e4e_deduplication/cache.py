@@ -2,10 +2,10 @@
 Represents a database to keep track of checksums between runs.
 """
 from pathlib import Path
-from shutil import copyfile
 from sqlite3 import Connection, Cursor, connect
-from tempfile import TemporaryDirectory
 from typing import Dict, List
+
+import py7zr
 
 from e4e_deduplication.file import File
 
@@ -16,25 +16,42 @@ class Cache:
 
     def __init__(self, path: Path, root: Path) -> None:
         self._path = path
-        self._backup = Path(path.parent, f"{path.name}.bak")
         self._root = root
-        self._temp_dir = TemporaryDirectory()
-        self._temp_path = Path(self._temp_dir.name, path.name)
+        self._cache_root = Path("~", ".cache", "e4e", "deduplication")
+        self._cache_root.mkdir(exist_ok=True, parents=True)
+        self._cache_path = Path(self._cache_root, path.name[:-3])
 
         self._connection: Connection = None
         self._cursor: Cursor = None
 
     def __enter__(self):
-        if self._path.exists():
-            copyfile(self._path, self._temp_path)
+        if self._path.exists() and (
+            not self._does_cache_exist()
+            or self._path.lstat().st_mtime > self._cache_path.lstat().st_mtime
+        ):
+            with py7zr.SevenZipFile(self._path, "r") as archive:
+                archive.extractall(self._cache_root)
 
-        self._connection = connect(self._temp_path)
+        self._connection = connect(self._cache_path)
         self._cursor = self._connection.cursor()
 
         self._cursor.execute(
             """CREATE TABLE IF NOT EXISTS files
-            (name text, path text, size int, mtime float, checksum text, seen integer)"""
+            (name text, path text, size int, mtime float, checksum blob, seen integer)"""
         )
+
+        self._cursor.execute(
+            """CREATE TABLE IF NOT EXISTS metadata
+            (key text, value text)"""
+        )
+
+        results = self._cursor.execute(
+            "SELECT key, value FROM metadata WHERE key = 'RootPath'"
+        )
+        if not results:
+            self._cursor.execute(
+                "INSERT INTO metadata VALUES ('RootPath', ?)", (self._root.as_posix(),)
+            )
 
         self._connection.commit()
 
@@ -44,7 +61,24 @@ class Cache:
         self.commit()
         self._cursor.close()
 
-        self._temp_dir.cleanup()
+        with py7zr.SevenZipFile(self._path, "w") as archive:
+            archive.write(self._cache_path)
+
+        self._cache_path.unlink()
+
+    def _does_cache_exist(self):
+        if not self._cache_path.exists():
+            return False
+
+        with connect(self._cache_path) as connection:
+            cursor = connection.cursor()
+            results = cursor.execute(
+                "SELECT key, value FROM metadata WHERE key = 'RootPath'"
+            )
+            if results:
+                _, value = results[0]
+
+                return value == self._root.as_posix()
 
     def _item_in_cache(self, file: File) -> bool:
         results = self._cursor.execute(
@@ -102,7 +136,7 @@ class Cache:
             "SELECT name, path, size, mtime, checksum, seen FROM files"
         )
 
-        files_by_checksum: Dict[str, List[str]] = {}
+        files_by_checksum: Dict[bytes, List[str]] = {}
         for _, path, _, _, checksum, _ in results:
             if checksum not in files_by_checksum:
                 files_by_checksum[checksum] = []
@@ -129,9 +163,3 @@ class Cache:
         Commits the cache to file.
         """
         self._connection.commit()
-        copyfile(self._temp_path, self._backup)
-
-        if self._path.exists():
-            self._path.unlink()
-
-        self._backup.rename(self._path)

@@ -44,7 +44,7 @@ class File:
         return self._path.lstat().st_mtime
 
     @property
-    def checksum(self) -> str:
+    def checksum(self) -> bytes:
         """
         Gets a sha256 checksum.
         This is recacluated everytime this function is called in case it changes.
@@ -57,4 +57,4 @@ class File:
                     break
                 checksum.update(buf)
 
-        return checksum.hexdigest()
+        return checksum.digest()
