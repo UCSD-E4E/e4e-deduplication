@@ -17,7 +17,7 @@ class Cache:
     def __init__(self, path: Path, root: Path) -> None:
         self._path = path
         self._root = root
-        self._cache_root = Path("~", ".cache", "e4e", "deduplication")
+        self._cache_root = Path(Path.home(), ".cache", "e4e", "deduplication")
         self._cache_root.mkdir(exist_ok=True, parents=True)
         self._cache_path = Path(self._cache_root, path.name[:-3])
 
