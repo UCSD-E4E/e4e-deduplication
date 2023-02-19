@@ -32,7 +32,7 @@ def _get_args() -> Tuple[Path, Path, Path]:
     return directory_path, cache_path, report_path, set(args.exclude.split(","))
 
 
-def seconds_to_minutes(seconds: float):
+def _seconds_to_minutes(seconds: float):
     return seconds / 60
 
 
@@ -44,7 +44,7 @@ def _generate_cache(directory: Directory, cache: Cache) -> None:
 
         # Commit every 10 minutes or every 10 items.
         # Whichever is first
-        if idx % 10 or seconds_to_minutes(start_time - perf_counter()) >= 10:
+        if idx % 10 or _seconds_to_minutes(start_time - perf_counter()) >= 10:
             start_time = perf_counter()
             cache.commit()
 

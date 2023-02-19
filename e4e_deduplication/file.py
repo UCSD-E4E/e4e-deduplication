@@ -50,9 +50,9 @@ class File:
         This is recacluated everytime this function is called in case it changes.
         """
         checksum = sha256()
-        with open(self._path.absolute(), "rb") as f:
+        with open(self._path.absolute(), "rb") as file:
             while True:
-                buf = f.read(2**20)
+                buf = file.read(2**20)
                 if not buf:
                     break
                 checksum.update(buf)

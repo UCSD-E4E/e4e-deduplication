@@ -66,7 +66,7 @@ class Cache:
 
         self._cache_path.unlink()
 
-    def _does_cache_exist(self):
+    def _does_cache_exist(self) -> bool:
         if not self._cache_path.exists():
             return False
 
@@ -75,10 +75,14 @@ class Cache:
             results = cursor.execute(
                 "SELECT key, value FROM metadata WHERE key = 'RootPath'"
             )
+            value = None
             if results:
                 _, value = results[0]
 
                 return value == self._root.as_posix()
+
+            # The metadata key for the RootPath is missing.
+            return False
 
     def _item_in_cache(self, file: File) -> bool:
         results = self._cursor.execute(
