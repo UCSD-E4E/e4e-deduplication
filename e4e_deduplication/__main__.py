@@ -43,7 +43,7 @@ def _generate_cache(directory: Directory, cache: Cache) -> None:
         cache.add_or_update_file(file)
 
         # Commit every 10 minutes or every 10 items.
-        # Whichever is first
+        # Whichever is first.  Some files take a long time to checksum.
         if idx % 10 or _seconds_to_minutes(start_time - perf_counter()) >= 10:
             start_time = perf_counter()
             cache.commit()

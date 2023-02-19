@@ -25,6 +25,8 @@ class Cache:
         self._cursor: Cursor = None
 
     def __enter__(self):
+        # If we have a valid checksums.db file,
+        # let's use it as a starting point.
         if self._path.exists() and (
             not self._does_cache_exist()
             or self._path.lstat().st_mtime > self._cache_path.lstat().st_mtime
@@ -45,6 +47,7 @@ class Cache:
             (key text, value text)"""
         )
 
+        # This adds the RootPath property if it does not already exist.
         results = self._cursor.execute(
             "SELECT key, value FROM metadata WHERE key = 'RootPath'"
         )
@@ -61,9 +64,13 @@ class Cache:
         self.commit()
         self._cursor.close()
 
+        # This is intended to replace the file within the archive if it already exists.
+        # This is to get around the recycle bin on Synology.
         with py7zr.SevenZipFile(self._path, "w") as archive:
             archive.write(self._cache_path)
 
+        # Cleanup after ourselves.
+        # The existance of the checksums.db is an indication that we did not complete successfully.
         self._cache_path.unlink()
 
     def _does_cache_exist(self) -> bool:
@@ -93,6 +100,7 @@ class Cache:
         return any(results)
 
     def _add_item(self, file: File) -> None:
+        # This encurs the cost of calculating the checksum.
         self._cursor.execute(
             "INSERT INTO files VALUES (?, ?, ?, ?, ?, 1)",
             (file.name, file.path, file.size, file.mtime, file.checksum),
@@ -104,10 +112,12 @@ class Cache:
             (file.path,),
         )
 
+        # We don't want to recalculate the checksum if the file hasn't changed.
         _, _, _, mtime, _, _ = list(results)[0]
         if mtime == file.mtime:
             return
 
+        # Calling this incurs the penalty of recalcuating the checksum.
         self._cursor.execute(
             """UPDATE files
                 SET size = ?,
@@ -129,6 +139,7 @@ class Cache:
         else:
             self._add_item(file)
 
+        # We may wish to commit to the database elsewhere.
         if commit:
             self.commit()
 
@@ -140,6 +151,8 @@ class Cache:
             "SELECT name, path, size, mtime, checksum, seen FROM files"
         )
 
+        # Use checksums as the indicator if the file is the same.
+        # This helps us account for files that were copied later, or files with different names.
         files_by_checksum: Dict[bytes, List[str]] = {}
         for _, path, _, _, checksum, _ in results:
             if checksum not in files_by_checksum:
@@ -147,6 +160,7 @@ class Cache:
 
             files_by_checksum[checksum].append(path)
 
+        # Filter to a list where we only have checksums with duplicates.
         return [
             [File(Path(self._root, f), self._root) for f in v]
             for _, v in files_by_checksum.items()
@@ -158,6 +172,7 @@ class Cache:
         Removes files that were not seen this run.
         That means they were deleted or renamed.
         """
+        # These are files we did not see this run.
         self._cursor.execute("DELETE FROM files WHERE seen = 0")
 
         self.commit()

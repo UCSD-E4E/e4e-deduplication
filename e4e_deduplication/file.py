@@ -49,6 +49,8 @@ class File:
         Gets a sha256 checksum.
         This is recacluated everytime this function is called in case it changes.
         """
+        # We are opting to do this rather than using the built in method
+        # because it was not supported in Python 3.8.
         checksum = sha256()
         with open(self._path.absolute(), "rb") as file:
             while True:

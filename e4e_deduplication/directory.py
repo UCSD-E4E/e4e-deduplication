@@ -7,6 +7,8 @@ from typing import Generator, Set
 from e4e_deduplication.file import File
 
 
+# We are opting to disable too-few-public-methods because this object
+# is intended to only be used as an iterator.
 class Directory:  # pylint: disable=too-few-public-methods
     """
     Represents a Directory.  Can be iterated over.
@@ -24,6 +26,7 @@ class Directory:  # pylint: disable=too-few-public-methods
                 continue
 
             if path.is_dir():
+                # This calls _get_files recurisvely, making the iterating over files recursive.
                 for file in Directory(
                     path.absolute(), self._excluded_files, root=self._root.absolute()
                 ):
