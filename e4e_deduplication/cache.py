@@ -87,12 +87,12 @@ class Cache:
 
         with connect(self._cache_path) as connection:
             cursor = connection.cursor()
-            results = cursor.execute(
-                "SELECT key, value FROM metadata WHERE key = 'RootPath'"
+            results = list(
+                cursor.execute("SELECT key, value FROM metadata WHERE key = 'RootPath'")
             )
             value = None
             if results:
-                _, value = next(results)
+                _, value = results[0]
 
                 return value == self._root.as_posix()
 
