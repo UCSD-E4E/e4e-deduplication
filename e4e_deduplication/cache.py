@@ -48,8 +48,10 @@ class Cache:
         )
 
         # This adds the RootPath property if it does not already exist.
-        results = self._cursor.execute(
-            "SELECT key, value FROM metadata WHERE key = 'RootPath'"
+        results = list(
+            self._cursor.execute(
+                "SELECT key, value FROM metadata WHERE key = 'RootPath'"
+            )
         )
         if not results:
             self._cursor.execute(
