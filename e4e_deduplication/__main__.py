@@ -39,7 +39,8 @@ def _seconds_to_minutes(seconds: float):
 def _generate_cache(directory: Directory, cache: Cache) -> None:
     start_time = perf_counter()
     for idx, file in enumerate(directory):
-        print(file.path)
+        if file not in cache:
+            print(file.path)
         cache.add_or_update_file(file)
 
         # Commit every 10 minutes or every 10 items.

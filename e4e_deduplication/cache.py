@@ -73,6 +73,14 @@ class Cache:
         # The existance of the checksums.db is an indication that we did not complete successfully.
         self._cache_path.unlink()
 
+    def __contains__(self, file: File) -> bool:
+        results = self._cursor.execute(
+            "SELECT name, path, size, mtime, checksum, seen FROM files WHERE path = ?",
+            (file.path,),
+        )
+
+        return any(results)
+
     def _does_cache_exist(self) -> bool:
         if not self._cache_path.exists():
             return False
@@ -90,14 +98,6 @@ class Cache:
 
             # The metadata key for the RootPath is missing.
             return False
-
-    def _item_in_cache(self, file: File) -> bool:
-        results = self._cursor.execute(
-            "SELECT name, path, size, mtime, checksum, seen FROM files WHERE path = ?",
-            (file.path,),
-        )
-
-        return any(results)
 
     def _add_item(self, file: File) -> None:
         # This encurs the cost of calculating the checksum.
@@ -134,7 +134,7 @@ class Cache:
         Only commits to file if commit==True.
         If commit==False, ensure to call .commit() separately.
         """
-        if self._item_in_cache(file):
+        if file in self:
             self._update_item(file)
         else:
             self._add_item(file)
