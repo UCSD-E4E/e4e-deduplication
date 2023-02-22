@@ -92,7 +92,7 @@ class Cache:
             )
             value = None
             if results:
-                _, value = results[0]
+                _, value = next(results)
 
                 return value == self._root.as_posix()
 
