@@ -53,8 +53,7 @@ def _generate_cache(directory: Directory, cache: Cache) -> None:
     start_time = perf_counter()
     dirty = False
     for idx, file in enumerate(directory):
-        if file not in cache:
-            print(file.path)
+        print(file.path)
         dirty = dirty or cache.add_or_update_file(file)
 
         # Avoid the overhead of committing when nothing has changed.
