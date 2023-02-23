@@ -38,16 +38,23 @@ def _seconds_to_minutes(seconds: float):
 
 def _generate_cache(directory: Directory, cache: Cache) -> None:
     start_time = perf_counter()
+    dirty = False
     for idx, file in enumerate(directory):
         if file not in cache:
             print(file.path)
-        cache.add_or_update_file(file)
+        updated = cache.add_or_update_file(file)
+        dirty = dirty or updated
+
+        # Avoid the overhead of committing when nothing has changed.
+        if not updated and not dirty:
+            continue
 
         # Commit every 10 minutes or every 10 items.
         # Whichever is first.  Some files take a long time to checksum.
         if idx % 10 or _seconds_to_minutes(start_time - perf_counter()) >= 10:
             start_time = perf_counter()
             cache.commit()
+            dirty = False
 
     cache.clear_deleted()
     cache.commit()

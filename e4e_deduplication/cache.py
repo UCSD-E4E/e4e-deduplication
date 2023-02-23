@@ -109,7 +109,7 @@ class Cache:
         )
         self._in_memory_cache[file.path] = file.mtime
 
-    def _update_item(self, file: File) -> None:
+    def _update_item(self, file: File) -> bool:
         results = self._cursor.execute(
             "SELECT mtime FROM files WHERE path = ?",
             (file.path,),
@@ -118,7 +118,7 @@ class Cache:
         # We don't want to recalculate the checksum if the file hasn't changed.
         mtime = list(results)[0]
         if mtime == file.mtime:
-            return
+            return False
 
         # Calling this incurs the penalty of recalcuating the checksum.
         self._cursor.execute(
@@ -132,20 +132,26 @@ class Cache:
         )
         self._in_memory_cache[file.path] = file.mtime
 
-    def add_or_update_file(self, file: File, commit=True) -> None:
+        return True
+
+    def add_or_update_file(self, file: File, commit=True) -> bool:
         """
         Adds or updates the specified File object in the cache.
         Only commits to file if commit==True.
         If commit==False, ensure to call .commit() separately.
         """
+        updated = False
         if file in self:
-            self._update_item(file)
+            updated = self._update_item(file)
         else:
             self._add_item(file)
+            updated = True
 
         # We may wish to commit to the database elsewhere.
         if commit:
             self.commit()
+
+        return updated
 
     def get_duplicates(self) -> List[List[File]]:
         """
