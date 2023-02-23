@@ -81,7 +81,7 @@ class Cache:
 
     def __contains__(self, file: File) -> bool:
         results = self._cursor.execute(
-            "SELECT seen WHERE path = ?",
+            "SELECT seen FROM files WHERE path = ?",
             (file.path,),
         )
 
