@@ -61,6 +61,13 @@ class Cache:
                 "INSERT INTO metadata VALUES ('RootPath', ?)", (self._root.as_posix(),)
             )
 
+        if self._skip_mtime_check:
+            # We should not set seen to 0 since we are reupdating the old entries.
+            self._cursor.execute("UPDATE files SET seen = 1")
+        else:
+            # We are going to reupdate the files, so we should mark everything as unseen.
+            self._cursor.execute("UPDATE files SET seen = 0")
+
         self._connection.commit()
 
         results = self._cursor.execute("SELECT path, mtime FROM files")

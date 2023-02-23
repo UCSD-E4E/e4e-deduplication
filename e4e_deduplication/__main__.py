@@ -11,7 +11,7 @@ from e4e_deduplication.directory import Directory
 from e4e_deduplication.report import Report
 
 
-def _get_args() -> Tuple[Path, Path, Path, Set[str], bool]:
+def _get_args() -> Tuple[Path, Path, Path, Set[Path], bool]:
     parser = ArgumentParser(
         description="Looks through a single directory and generates a list of duplicate files."
     )
@@ -40,7 +40,7 @@ def _get_args() -> Tuple[Path, Path, Path, Set[str], bool]:
         directory_path,
         cache_path,
         report_path,
-        set(args.exclude.split(",")),
+        {Path(directory_path, exclude) for exclude in args.exclude.split(",")},
         args.skip_recheck,
     )
 
@@ -80,11 +80,11 @@ def main() -> None:
         directory_path,
         cache_path,
         report_path,
-        excluded_files,
+        excluded_paths,
         skip_mtime_recheck,
     ) = _get_args()
 
-    directory = Directory(directory_path, excluded_files)
+    directory = Directory(directory_path, excluded_paths)
 
     with Cache(
         cache_path, directory_path, skip_mtime_check=skip_mtime_recheck
