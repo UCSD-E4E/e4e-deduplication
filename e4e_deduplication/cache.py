@@ -128,6 +128,7 @@ class Cache:
 
         # We don't want to recalculate the checksum if the file hasn't changed.
         mtime = list(results)[0]
+        print(f"sql mtime: {mtime}, file mtime: {file.mtime}")
         if mtime == file.mtime:
             self._cursor.execute(
                 """UPDATE files
