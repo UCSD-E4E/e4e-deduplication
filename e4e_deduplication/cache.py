@@ -129,6 +129,12 @@ class Cache:
         # We don't want to recalculate the checksum if the file hasn't changed.
         mtime = list(results)[0]
         if mtime == file.mtime:
+            self._cursor.execute(
+                """UPDATE files
+                    SET seen = 1
+                    WHERE path = ?;""",
+                (file.path,),
+            )
             return False
 
         # Calling this incurs the penalty of recalcuating the checksum.
