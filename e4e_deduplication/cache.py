@@ -22,6 +22,7 @@ class Cache:
         self._cache_path = Path(self._cache_root, path.name[:-3])
 
         self._skip_mtime_check = skip_mtime_check
+        self._in_memory_cache: Dict[str, float] = None
 
         self._connection: Connection = None
         self._cursor: Cursor = None
@@ -63,6 +64,7 @@ class Cache:
         self._connection.commit()
 
         results = self._cursor.execute("SELECT path, mtime FROM files")
+        self._in_memory_cache = {path: mtime for path, mtime, in results}
 
         return self
 
@@ -80,12 +82,7 @@ class Cache:
         self._cache_path.unlink()
 
     def __contains__(self, file: File) -> bool:
-        results = self._cursor.execute(
-            "SELECT seen FROM files WHERE path = ?",
-            (file.path,),
-        )
-
-        return any(results)
+        return file.path in self._in_memory_cache
 
     def _does_cache_exist(self) -> bool:
         if not self._cache_path.exists():
@@ -152,6 +149,9 @@ class Cache:
         else:
             self._add_item(file)
             updated = True
+
+        if updated:
+            self._in_memory_cache[file.path] = file.mtime
 
         # We may wish to commit to the database elsewhere.
         if commit:
