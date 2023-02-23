@@ -42,11 +42,10 @@ def _generate_cache(directory: Directory, cache: Cache) -> None:
     for idx, file in enumerate(directory):
         if file not in cache:
             print(file.path)
-        updated = cache.add_or_update_file(file)
-        dirty = dirty or updated
+        dirty = dirty or cache.add_or_update_file(file)
 
         # Avoid the overhead of committing when nothing has changed.
-        if not updated and not dirty:
+        if not dirty:
             continue
 
         # Commit every 10 minutes or every 10 items.
