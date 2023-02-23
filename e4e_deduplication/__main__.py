@@ -4,14 +4,14 @@ Provides a cli around the E4E deduplication module.
 from argparse import ArgumentParser
 from pathlib import Path
 from time import perf_counter
-from typing import Tuple
+from typing import Set, Tuple
 
 from e4e_deduplication.cache import Cache
 from e4e_deduplication.directory import Directory
 from e4e_deduplication.report import Report
 
 
-def _get_args() -> Tuple[Path, Path, Path]:
+def _get_args() -> Tuple[Path, Path, Path, Set[str], bool]:
     parser = ArgumentParser(
         description="Looks through a single directory and generates a list of duplicate files."
     )
@@ -24,12 +24,25 @@ def _get_args() -> Tuple[Path, Path, Path]:
         "-e", "--exclude", type=str, default="", help="Paths to exclude."
     )
 
+    parser.add_argument(
+        "-s",
+        "--skip-recheck",
+        action="store_true",
+        help="Skips updating files in the cache.",
+    )
+
     args = parser.parse_args()
     directory_path = args.directory.absolute()
     cache_path = Path(directory_path, "checksums.db.7z").absolute()
     report_path = Path(directory_path, "report.csv").absolute()
 
-    return directory_path, cache_path, report_path, set(args.exclude.split(","))
+    return (
+        directory_path,
+        cache_path,
+        report_path,
+        set(args.exclude.split(",")),
+        args.skip_recheck,
+    )
 
 
 def _seconds_to_minutes(seconds: float):
@@ -63,11 +76,19 @@ def main() -> None:
     """
     Entry point for the CLI.
     """
-    directory_path, cache_path, report_path, excluded_files = _get_args()
+    (
+        directory_path,
+        cache_path,
+        report_path,
+        excluded_files,
+        skip_mtime_recheck,
+    ) = _get_args()
 
     directory = Directory(directory_path, excluded_files)
 
-    with Cache(cache_path, directory_path) as cache:
+    with Cache(
+        cache_path, directory_path, skip_mtime_check=skip_mtime_recheck
+    ) as cache:
         _generate_cache(directory, cache)
 
         report = Report(report_path, cache)

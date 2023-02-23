@@ -14,14 +14,14 @@ class Cache:
     """
     Represents a database to keep track of checksums between runs."""
 
-    def __init__(self, path: Path, root: Path) -> None:
+    def __init__(self, path: Path, root: Path, skip_mtime_check=False) -> None:
         self._path = path
         self._root = root
         self._cache_root = Path(Path.home(), ".cache", "e4e", "deduplication")
         self._cache_root.mkdir(exist_ok=True, parents=True)
         self._cache_path = Path(self._cache_root, path.name[:-3])
 
-        self._in_memory_cache: Dict[str, float] = None
+        self._skip_mtime_check = skip_mtime_check
 
         self._connection: Connection = None
         self._cursor: Cursor = None
@@ -63,7 +63,6 @@ class Cache:
         self._connection.commit()
 
         results = self._cursor.execute("SELECT path, mtime FROM files")
-        self._in_memory_cache = {path: mtime for path, mtime in results}
 
         return self
 
@@ -81,7 +80,12 @@ class Cache:
         self._cache_path.unlink()
 
     def __contains__(self, file: File) -> bool:
-        return file.path in self._in_memory_cache
+        results = self._cursor.execute(
+            "SELECT seen WHERE path = ?",
+            (file.path,),
+        )
+
+        return any(results)
 
     def _does_cache_exist(self) -> bool:
         if not self._cache_path.exists():
@@ -107,9 +111,12 @@ class Cache:
             "INSERT INTO files VALUES (?, ?, ?, ?, ?, 1)",
             (file.name, file.path, file.size, file.mtime, file.checksum),
         )
-        self._in_memory_cache[file.path] = file.mtime
 
     def _update_item(self, file: File) -> bool:
+        # If we are not changing files, then this isn't necessary.
+        if self._skip_mtime_check:
+            return False
+
         results = self._cursor.execute(
             "SELECT mtime FROM files WHERE path = ?",
             (file.path,),
@@ -130,7 +137,6 @@ class Cache:
                 WHERE path = ?;""",
             (file.size, file.mtime, file.checksum, file.path),
         )
-        self._in_memory_cache[file.path] = file.mtime
 
         return True
 
