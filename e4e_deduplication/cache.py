@@ -21,6 +21,8 @@ class Cache:
         self._cache_root.mkdir(exist_ok=True, parents=True)
         self._cache_path = Path(self._cache_root, path.name[:-3])
 
+        self._in_memory_cache: Dict[str, float] = None
+
         self._connection: Connection = None
         self._cursor: Cursor = None
 
@@ -60,6 +62,9 @@ class Cache:
 
         self._connection.commit()
 
+        results = self._cursor.execute("SELECT path, mtime FROM files")
+        self._in_memory_cache = {path: mtime for path, mtime in results}
+
         return self
 
     def __exit__(self, *args) -> None:
@@ -76,12 +81,7 @@ class Cache:
         self._cache_path.unlink()
 
     def __contains__(self, file: File) -> bool:
-        results = self._cursor.execute(
-            "SELECT name, path, size, mtime, checksum, seen FROM files WHERE path = ?",
-            (file.path,),
-        )
-
-        return any(results)
+        return file.path in self._in_memory_cache
 
     def _does_cache_exist(self) -> bool:
         if not self._cache_path.exists():
@@ -90,11 +90,11 @@ class Cache:
         with connect(self._cache_path) as connection:
             cursor = connection.cursor()
             results = list(
-                cursor.execute("SELECT key, value FROM metadata WHERE key = 'RootPath'")
+                cursor.execute("SELECT value FROM metadata WHERE key = 'RootPath'")
             )
             value = None
             if results:
-                _, value = results[0]
+                value = results[0]
 
                 return value == self._root.as_posix()
 
@@ -107,15 +107,16 @@ class Cache:
             "INSERT INTO files VALUES (?, ?, ?, ?, ?, 1)",
             (file.name, file.path, file.size, file.mtime, file.checksum),
         )
+        self._in_memory_cache[file.path] = file.mtime
 
     def _update_item(self, file: File) -> None:
         results = self._cursor.execute(
-            "SELECT name, path, size, mtime, checksum, seen FROM files WHERE path = ?",
+            "SELECT mtime FROM files WHERE path = ?",
             (file.path,),
         )
 
         # We don't want to recalculate the checksum if the file hasn't changed.
-        _, _, _, mtime, _, _ = list(results)[0]
+        mtime = list(results)[0]
         if mtime == file.mtime:
             return
 
@@ -129,6 +130,7 @@ class Cache:
                 WHERE path = ?;""",
             (file.size, file.mtime, file.checksum, file.path),
         )
+        self._in_memory_cache[file.path] = file.mtime
 
     def add_or_update_file(self, file: File, commit=True) -> None:
         """
@@ -149,14 +151,12 @@ class Cache:
         """
         Gets a list of all of the duplicate file objects in the cache.
         """
-        results = self._cursor.execute(
-            "SELECT name, path, size, mtime, checksum, seen FROM files"
-        )
+        results = self._cursor.execute("SELECT path, checksum FROM files")
 
         # Use checksums as the indicator if the file is the same.
         # This helps us account for files that were copied later, or files with different names.
         files_by_checksum: Dict[bytes, List[str]] = {}
-        for _, path, _, _, checksum, _ in results:
+        for path, checksum in results:
             if checksum not in files_by_checksum:
                 files_by_checksum[checksum] = []
 
