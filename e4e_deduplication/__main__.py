@@ -116,7 +116,7 @@ def main() -> None:
             cache,
             directory_path,
         )
-        report.generate()
+        report.generate(original_paths)
 
 
 if __name__ == "__main__":
