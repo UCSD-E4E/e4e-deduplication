@@ -31,16 +31,31 @@ def _get_args() -> Tuple[Path, Path, Path, Set[Path], bool]:
         help="Skips updating files in the cache.",
     )
 
+    parser.add_argument(
+        "-o",
+        "--originals",
+        type=str,
+        default="",
+        help="Directories to consider original.",
+    )
+
     args = parser.parse_args()
     directory_path = args.directory.absolute()
     cache_path = Path(directory_path, "checksums.db.7z").absolute()
-    report_path = Path(directory_path, "report.csv").absolute()
+    duplicate_folders_with_originals_path = Path(
+        directory_path, "duplicate_folders_with_originals.csv"
+    ).absolute()
+    duplicates_without_originals_path = Path(
+        directory_path, "duplicates_without_originals.csv"
+    ).absolute()
 
     return (
         directory_path,
         cache_path,
-        report_path,
+        duplicate_folders_with_originals_path,
+        duplicates_without_originals_path,
         {Path(directory_path, exclude) for exclude in args.exclude.split(",")},
+        {Path(directory_path, original) for original in args.originals.split(",")},
         args.skip_recheck,
     )
 
@@ -78,8 +93,10 @@ def main() -> None:
     (
         directory_path,
         cache_path,
-        report_path,
+        duplicate_folders_with_originals_path,
+        duplicates_without_originals_path,
         excluded_paths,
+        original_paths,
         skip_mtime_recheck,
     ) = _get_args()
 
@@ -88,9 +105,10 @@ def main() -> None:
     with Cache(
         cache_path, directory_path, skip_mtime_check=skip_mtime_recheck
     ) as cache:
+        cache.log_run(directory, excluded_paths, original_paths, skip_mtime_recheck)
         _generate_cache(directory, cache)
 
-        report = Report(report_path, cache)
+        report = Report(duplicate_folders_with_originals_path, duplicates_without_originals_path, cache)
         report.generate()
 
 

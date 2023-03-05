@@ -3,7 +3,8 @@ Represents a database to keep track of checksums between runs.
 """
 from pathlib import Path
 from sqlite3 import Connection, Cursor, connect
-from typing import Dict, List
+from time import time
+from typing import Dict, List, Set, Tuple
 
 import py7zr
 
@@ -48,6 +49,11 @@ class Cache:
         self._cursor.execute(
             """CREATE TABLE IF NOT EXISTS metadata
             (key text, value text)"""
+        )
+
+        self._cursor.execute(
+            """CREATE TABLE IF NOT EXISTS runs
+            (float time, argument text, value text)"""
         )
 
         # This adds the RootPath property if it does not already exist.
@@ -150,6 +156,33 @@ class Cache:
 
         return True
 
+    def log_run(
+        self,
+        directory: Path,
+        excluded_paths: List[Path],
+        original_paths: List[Path],
+        skip_recheck: bool,
+    ):
+        curr_time = time()
+
+        self._cursor.execute(
+            "INSERT INTO runs VALUES (?, 'directory', ?)",
+            (curr_time, directory.as_posix()),
+        )
+        self._cursor.executemany(
+            "INSERT INTO runs VALUES (?, 'exclude_path', ?)",
+            [(curr_time, excluded.as_posix()) for excluded in excluded_paths],
+        )
+        self._cursor.executemany(
+            "INSERT INTO runs VALUES (?, 'original_path', ?)",
+            [(curr_time, original.as_posix()) for original in original_paths],
+        )
+        self._cursor.execute(
+            "INSERT INTO runs VALUES (?, 'skip_recheck', ?)", (curr_time, skip_recheck)
+        )
+
+        self._connection.commit()
+
     def add_or_update_file(self, file: File, commit=True) -> bool:
         """
         Adds or updates the specified File object in the cache.
@@ -172,7 +205,7 @@ class Cache:
 
         return updated
 
-    def get_duplicates(self) -> List[List[File]]:
+    def get_duplicates(self) -> Tuple[Set[List[Path]], Set[Path]]:
         """
         Gets a list of all of the duplicate file objects in the cache.
         """
@@ -188,11 +221,19 @@ class Cache:
             files_by_checksum[checksum].append(path)
 
         # Filter to a list where we only have checksums with duplicates.
-        return [
-            [File(Path(self._root, f), self._root) for f in v]
+        duplicates = {
+            [Path(self._root, f) for f in v]
             for _, v in files_by_checksum.items()
             if len(v) > 1
-        ]
+        }
+        nonduplicates = {
+            Path(self._root, f)
+            for _, v in files_by_checksum.items()
+            if len(v) == 1
+            for f in v
+        }
+
+        return duplicates, nonduplicates
 
     def clear_deleted(self) -> None:
         """
