@@ -114,6 +114,7 @@ def main() -> None:
             duplicate_folders_with_originals_path,
             duplicates_without_originals_path,
             cache,
+            directory_path,
         )
         report.generate()
 
