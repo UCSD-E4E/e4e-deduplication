@@ -105,10 +105,16 @@ def main() -> None:
     with Cache(
         cache_path, directory_path, skip_mtime_check=skip_mtime_recheck
     ) as cache:
-        cache.log_run(directory, excluded_paths, original_paths, skip_mtime_recheck)
+        cache.log_run(
+            directory_path, excluded_paths, original_paths, skip_mtime_recheck
+        )
         _generate_cache(directory, cache)
 
-        report = Report(duplicate_folders_with_originals_path, duplicates_without_originals_path, cache)
+        report = Report(
+            duplicate_folders_with_originals_path,
+            duplicates_without_originals_path,
+            cache,
+        )
         report.generate()
 
 
