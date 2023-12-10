@@ -2,18 +2,28 @@
 name = "e4e-deduplication"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Nathan Hui <nthui@ucsd.edu>"]
 readme = "README.md"
 packages = [{include = "e4e_deduplication"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 py7zr = "^0.20.4"
+appdirs = "^1.4.4"
+pyfilehash = {git = "https://github.com/UCSD-E4E/pyFileHash.git"}
+schema = "^0.7.5"
+tqdm = "^4.66.1"
 
 [tool.poetry.dev-dependencies]
 black = "^23.1.0"
 pylint = "^2.16.2"
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+e4e_deduplication = "e4e_deduplication.__main__:main"

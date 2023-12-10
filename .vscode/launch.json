@@ -5,15 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "e4e_deduplication",
             "type": "python",
             "request": "launch",
-            "program": "e4e_deduplication",
-            "console": "integratedTerminal",
+            "module": "e4e_deduplication",
             "justMyCode": true,
             "args": [
-                "--directory",
-                "./data"
+                "-d",
+                ".venv",
+                "-j",
+                "test",
+                "-e",
+                "dedup_ignore.txt",
+                "analyze"
             ]
         }
     ]
