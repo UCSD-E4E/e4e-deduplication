@@ -28,7 +28,7 @@ def test_sha256_parallel(n_files: int):
         files: List[Path] = []
         for file_idx in range(n_files):
             new_file = Path(tmp_dir, f'rand_{file_idx:03d}')
-            create_random_file(new_file, 512*1024*1024)
+            create_random_file(new_file, 128*1024*1024)
             files.append(new_file)
         start = time.perf_counter()
         with Pool() as pool:
@@ -76,7 +76,7 @@ def test_sha1_parallel(n_files: int):
         files: List[Path] = []
         for file_idx in range(n_files):
             new_file = Path(tmp_dir, f'rand_{file_idx:03d}')
-            create_random_file(new_file, 512*1024*1024)
+            create_random_file(new_file, 128*1024*1024)
             files.append(new_file)
         start = time.perf_counter()
         with Pool() as pool:
@@ -124,7 +124,7 @@ def test_md5_parallel(n_files: int):
         files: List[Path] = []
         for file_idx in range(n_files):
             new_file = Path(tmp_dir, f'rand_{file_idx:03d}')
-            create_random_file(new_file, 512*1024*1024)
+            create_random_file(new_file, 128*1024*1024)
             files.append(new_file)
         start = time.perf_counter()
         with Pool() as pool:
