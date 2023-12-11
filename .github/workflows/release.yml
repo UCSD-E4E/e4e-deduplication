@@ -26,8 +26,11 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         root_options: "-vv"
+    outputs:
+      release: ${{ steps.release.outputs.released }}
 
   build_wheels:
+    if: needs.release.outputs.release == 'true'
     name: Build wheels on ${{ matrix.os }}
     needs: [release]
     runs-on: ${{ matrix.os }}
