@@ -135,7 +135,7 @@ class Analyzer:
         """
         expected_schema = schema.Schema(
             {
-                str: [str]
+                schema.Optional(str): [str]
             }
         )
         if self.__job_path.is_file():
