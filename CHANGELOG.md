@@ -2,6 +2,17 @@
 
 
 
+## v0.2.0 (2023-12-11)
+
+### Feature
+
+* feat: Updates dedup for synology
+
+Merge pull request #2 from UCSD-E4E/file_filter ([`404641f`](https://github.com/UCSD-E4E/e4e-deduplication/commit/404641fccb68b37bddbbde4f653b89f720dd8d6c))
+
+* feat: Updates dedup for synology ([`b14f926`](https://github.com/UCSD-E4E/e4e-deduplication/commit/b14f926cf0ff56cecd0dc66f34a0f948f26ab74e))
+
+
 ## v0.1.2 (2023-12-11)
 
 ### Fix
