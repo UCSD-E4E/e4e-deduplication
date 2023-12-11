@@ -2,6 +2,17 @@
 
 
 
+## v0.1.2 (2023-12-11)
+
+### Fix
+
+* fix: Reduces console output to WARNING instead of DEBUG ([`fcfbe79`](https://github.com/UCSD-E4E/e4e-deduplication/commit/fcfbe7928fa466d94fbc897a01dc16a1e375d392))
+
+### Unknown
+
+* Merge branch &#39;master&#39; of github.com:UCSD-E4E/e4e-deduplication ([`f9cd7a5`](https://github.com/UCSD-E4E/e4e-deduplication/commit/f9cd7a535849e33c20b1e3b39dc11b14c9ecccaf))
+
+
 ## v0.1.1 (2023-12-11)
 
 ### Fix
