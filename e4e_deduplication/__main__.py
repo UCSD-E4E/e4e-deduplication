@@ -127,6 +127,11 @@ def main() -> None:
     logger.info(f'Using job path {job_path}')
 
     logger.info(f'Walking path {directory_path}')
+    if args.clear_cache:
+        user_input = input(
+            'Clearing the cache is a destructive operation, proceed? [y/N]: ')
+        if user_input.lower().strip() != 'y':
+            return
 
     if args.exclude:
         ignore_path: Path = args.exclude
