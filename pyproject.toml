@@ -18,6 +18,7 @@ pylint = "^2.16.2"
 pytest-cases = "^3.8.1"
 pytest = "^7.4.3"
 autopep8 = "^2.0.4"
+coverage = "^7.3.2"
 
 [build-system]
 requires = ["poetry-core", "pybind11", "setuptools"]
