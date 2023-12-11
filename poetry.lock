@@ -436,6 +436,16 @@ files = [
 ]
 
 [[package]]
+name = "multiprocessing-logging"
+version = "0.3.4"
+description = "Logger for multiprocessing applications"
+optional = false
+python-versions = "*"
+files = [
+    {file = "multiprocessing_logging-0.3.4-py2.py3-none-any.whl", hash = "sha256:8a5be02b02edbd6fa6e3e89499af7680db69db9e2d8707fcd28d445fa248f23e"},
+]
+
+[[package]]
 name = "packaging"
 version = "23.2"
 description = "Core utilities for Python packages"
@@ -1020,4 +1030,4 @@ requests = "*"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "b5f4b185c37d4aa7e359673257e2fd7f209bddc010c118470daecefdd7b7b187"
+content-hash = "5d937f181476d0df8b335cf6a408745ce2521f4989b4cac7209f0ae84162cbb4"

@@ -10,6 +10,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 from typing import TextIO
 
+import multiprocessing_logging
 from appdirs import AppDirs
 
 from e4e_deduplication.analyzer import Analyzer
@@ -61,6 +62,7 @@ def configure_loggers():
     console_handler.setFormatter(error_formatter)
     root_logger.addHandler(console_handler)
     logging.Formatter.converter = time.gmtime
+    multiprocessing_logging.install_mp_handler()
 
 
 def main() -> None:

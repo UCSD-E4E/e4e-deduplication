@@ -12,6 +12,7 @@ appdirs = "^1.4.4"
 schema = "^0.7.5"
 tqdm = "^4.66.1"
 pybind11 = "^2.11.1"
+multiprocessing-logging = "^0.3.4"
 
 [tool.poetry.group.dev.dependencies]
 pylint = "^2.16.2"
