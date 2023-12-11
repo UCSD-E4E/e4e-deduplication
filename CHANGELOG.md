@@ -2,6 +2,13 @@
 
 
 
+## v0.1.1 (2023-12-11)
+
+### Fix
+
+* fix: Fixes release publish ([`81bc878`](https://github.com/UCSD-E4E/e4e-deduplication/commit/81bc878ff37d6d549bfe12197e0360e3ee69bc7a))
+
+
 ## v0.1.0 (2023-12-11)
 
 ### Ci
