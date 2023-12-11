@@ -4,16 +4,16 @@ Provides a cli around the E4E deduplication module.
 import contextlib
 import logging
 import logging.handlers
-import re
 import sys
 import time
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import List, TextIO
+from typing import TextIO
 
 from appdirs import AppDirs
 
 from e4e_deduplication.analyzer import Analyzer
+from e4e_deduplication.file_filter import load_ignore_pattern
 
 app_dirs = AppDirs('e4e-deduplicator')
 
@@ -128,16 +128,9 @@ def main() -> None:
 
     logger.info(f'Walking path {directory_path}')
 
-    regex_patterns: List[str] = []
     if args.exclude:
-        with open(args.exclude, 'r', encoding='utf-8') as handle:
-            for line in handle:
-                if line.startswith('#'):
-                    continue
-                if len(line.strip()) == 0:
-                    continue
-                regex_patterns.append(line.strip())
-    ignore_pattern = re.compile('|'.join(regex_patterns))
+        ignore_path: Path = args.exclude
+        ignore_pattern = load_ignore_pattern(ignore_path)
     logger.info(f'Using ignore pattern {ignore_pattern}')
 
     with Analyzer(ignore_pattern=ignore_pattern, job_path=job_path) as app:

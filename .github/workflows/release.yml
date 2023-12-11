@@ -6,43 +6,6 @@ on:
       - master
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    concurrency: release
-    needs: [build_wheels]
-    permissions:
-      id-token: write
-      contents: write
-
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-        submodules: recursive
-
-    - uses: actions/download-artifact@v3
-      with:
-        name: artifact
-        path: dist
-    
-    - name: Check dist
-      run: ls -R dist
-
-    - name: Python Semantic Release
-      uses: python-semantic-release/python-semantic-release@master
-      id: release
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Publish package distributions to GitHub Releases
-      id: github-release
-
-      # NOTE: DO NOT wrap the conditional in ${{ }} as it will always evaluate to true.
-      # See https://github.com/actions/runner/issues/1173
-      if: steps.release.outputs.released == 'true'
-      uses: python-semantic-release/upload-to-gh-release@main
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ steps.release.outputs.tag }}
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -67,14 +30,46 @@ jobs:
           run: python -m pip install cibuildwheel
 
         - name: Build wheels
-          run: python -m cibuildwheel --output-dir wheelhouse
+          run: python -m cibuildwheel --output-dir dist
             # to supply options, put them in 'env', like:
             # env:
             #   CIBW_SOME_OPTION: value
           env:
-            CIBW_BUILD: "cp39-*64"
+            CIBW_BUILD: "cp39-*64 cp310-*64 cp311-*64 cp312-*64"
             CIBW_BEFORE_BUILD: git submodule update --init --recursive && pip install .
     
         - uses: actions/upload-artifact@v3
           with:
-            path: ./wheelhouse/*.whl
+            path: ./dist/*.whl
+
+  release:
+    runs-on: ubuntu-latest
+    concurrency: release
+    needs: [build_wheels]
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Python Semantic Release
+      uses: python-semantic-release/python-semantic-release@master
+      id: release
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        root_options: "-vv"
+
+    - name: Publish package distributions to GitHub Releases
+      id: github-release
+
+      # NOTE: DO NOT wrap the conditional in ${{ }} as it will always evaluate to true.
+      # See https://github.com/actions/runner/issues/1173
+      if: steps.release.outputs.released == 'true'
+      uses: python-semantic-release/upload-to-gh-release@main
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ steps.release.outputs.tag }}
