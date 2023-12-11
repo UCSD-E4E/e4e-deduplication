@@ -10,8 +10,9 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 import schema
-from pyfilehash.hasher import compute_sha256
 from tqdm import tqdm
+
+from pyfilehash.hasher import compute_sha256
 
 
 class Analyzer:
