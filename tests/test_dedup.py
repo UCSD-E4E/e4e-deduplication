@@ -24,7 +24,7 @@ def test_same_dir_dedup(test_analyzer: Analyzer):
         n_dupes = randint(0, n_files)
         logger.info(f'Duplicating {n_dupes} files')
         for idx in range(n_dupes):
-            idx_to_dupe = randint(0, n_files)
+            idx_to_dupe = randint(0, n_files - 1)
             file_to_duplicate = working_dir.joinpath(f'{idx_to_dupe:06d}.bin')
             dupe_file = dupe_dir.joinpath(f'dupe_{idx:06d}.bin')
             shutil.copy(file_to_duplicate, dupe_file)
@@ -52,10 +52,16 @@ def test_separate_dir_dedup(test_analyzer: Analyzer):
         n_dupes = randint(0, n_files)
         logger.info(f'Duplicating {n_dupes} files')
         for idx in range(n_dupes):
-            idx_to_dupe = randint(0, n_files)
+            idx_to_dupe = randint(0, n_files - 1)
             file_to_duplicate = working_dir.joinpath(f'{idx_to_dupe:06d}.bin')
             dupe_file = dupe_dir.joinpath(f'dupe_{idx:06d}.bin')
             shutil.copy(file_to_duplicate, dupe_file)
         test_analyzer.analyze(working_dir)
         results = test_analyzer.analyze(dupe_dir)
         assert sum(len(paths) - 1 for paths in results.values()) == n_dupes
+        total_files = len(list(dupe_dir.rglob('*')))
+        test_analyzer.delete(working_dir=dupe_dir, dry_run=True)
+        assert len(list(dupe_dir.rglob('*'))) == total_files
+        results = test_analyzer.delete(working_dir=dupe_dir)
+        assert len(results) == n_dupes
+        assert len(list(dupe_dir.rglob('*'))) == 0
