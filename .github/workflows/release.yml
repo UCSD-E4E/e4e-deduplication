@@ -6,8 +6,29 @@ on:
       - master
 
 jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+
+    - name: Python Semantic Release
+      uses: python-semantic-release/python-semantic-release@master
+      id: release
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        root_options: "-vv"
+
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
+    needs: [release]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -42,14 +63,12 @@ jobs:
           with:
             path: ./dist/*.whl
 
-  release:
+  publish:
     runs-on: ubuntu-latest
-    concurrency: release
     needs: [build_wheels]
     permissions:
       id-token: write
       contents: write
-
     steps:
     - uses: actions/checkout@v3
       with:
@@ -64,20 +83,8 @@ jobs:
     - name: Check dist
       run: ls -R dist
 
-    - name: Python Semantic Release
-      uses: python-semantic-release/python-semantic-release@master
-      id: release
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        root_options: "-vv"
-
     - name: Publish package distributions to GitHub Releases
       id: github-release
-
-      # NOTE: DO NOT wrap the conditional in ${{ }} as it will always evaluate to true.
-      # See https://github.com/actions/runner/issues/1173
-      if: steps.release.outputs.released == 'true'
       uses: python-semantic-release/upload-to-gh-release@main
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ steps.release.outputs.tag }}
