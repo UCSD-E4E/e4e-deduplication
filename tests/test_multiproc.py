@@ -19,6 +19,11 @@ from pyfilehash import hasher
     (8, 16)
 )
 def test_sha256_parallel(n_files: int):
+    """Tests parallel sha256
+
+    Args:
+        n_files (int): Number of files to test
+    """
     with TemporaryDirectory() as tmp_dir:
         files: List[Path] = []
         for file_idx in range(n_files):
@@ -29,7 +34,8 @@ def test_sha256_parallel(n_files: int):
         with Pool() as pool:
             digests = pool.map(python_sha256, files)
         end = time.perf_counter()
-        python_digests = {files[idx]:digests[idx] for idx in range(len(files))}
+        python_digests = {files[idx]: digests[idx]
+                          for idx in range(len(files))}
         python_time = end - start
 
         start = time.perf_counter()
@@ -37,20 +43,35 @@ def test_sha256_parallel(n_files: int):
             digests = pool.map(hasher.compute_sha256, files)
         end = time.perf_counter()
         c_time = end - start
-        c_digests = {files[idx]:digests[idx] for idx in range(len(files))}
+        c_digests = {files[idx]: digests[idx] for idx in range(len(files))}
 
         assert python_digests == c_digests
         assert c_time <= python_time
 
-def python_sha256(file: Path):
+
+def python_sha256(file: Path) -> str:
+    """Python SHA256 hasher
+
+    Args:
+        file (Path): File to hash
+
+    Returns:
+        str: SHA256 Hash
+    """
     with open(file, 'rb') as handle:
         return sha256(handle.read()).hexdigest()
+
 
 @pytest.mark.parametrize(
     'n_files',
     (8, 16)
 )
 def test_sha1_parallel(n_files: int):
+    """Tests sha1 in parallel
+
+    Args:
+        n_files (int): Number of files to test
+    """
     with TemporaryDirectory() as tmp_dir:
         files: List[Path] = []
         for file_idx in range(n_files):
@@ -61,7 +82,8 @@ def test_sha1_parallel(n_files: int):
         with Pool() as pool:
             digests = pool.map(python_sha1, files)
         end = time.perf_counter()
-        python_digests = {files[idx]:digests[idx] for idx in range(len(files))}
+        python_digests = {files[idx]: digests[idx]
+                          for idx in range(len(files))}
         python_time = end - start
 
         start = time.perf_counter()
@@ -69,20 +91,35 @@ def test_sha1_parallel(n_files: int):
             digests = pool.map(hasher.compute_sha1, files)
         end = time.perf_counter()
         c_time = end - start
-        c_digests = {files[idx]:digests[idx] for idx in range(len(files))}
+        c_digests = {files[idx]: digests[idx] for idx in range(len(files))}
 
         assert python_digests == c_digests
         assert c_time <= python_time
 
-def python_sha1(file: Path):
+
+def python_sha1(file: Path) -> str:
+    """Python SHA1 hasher
+
+    Args:
+        file (Path): Path to file to hash
+
+    Returns:
+        str: SHA1 digest
+    """
     with open(file, 'rb') as handle:
         return sha1(handle.read()).hexdigest()
+
 
 @pytest.mark.parametrize(
     'n_files',
     (8, 16)
 )
 def test_md5_parallel(n_files: int):
+    """Tests parallel MD5 hashing
+
+    Args:
+        n_files (int): Number of files
+    """
     with TemporaryDirectory() as tmp_dir:
         files: List[Path] = []
         for file_idx in range(n_files):
@@ -93,7 +130,8 @@ def test_md5_parallel(n_files: int):
         with Pool() as pool:
             digests = pool.map(python_md5, files)
         end = time.perf_counter()
-        python_digests = {files[idx]:digests[idx] for idx in range(len(files))}
+        python_digests = {files[idx]: digests[idx]
+                          for idx in range(len(files))}
         python_time = end - start
 
         start = time.perf_counter()
@@ -101,11 +139,20 @@ def test_md5_parallel(n_files: int):
             digests = pool.map(hasher.compute_md5, files)
         end = time.perf_counter()
         c_time = end - start
-        c_digests = {files[idx]:digests[idx] for idx in range(len(files))}
+        c_digests = {files[idx]: digests[idx] for idx in range(len(files))}
 
         assert python_digests == c_digests
         assert c_time <= python_time
 
-def python_md5(file: Path):
+
+def python_md5(file: Path) -> str:
+    """Python MD5 Hash
+
+    Args:
+        file (Path): File to hash
+
+    Returns:
+        str: MD5 Hash
+    """
     with open(file, 'rb') as handle:
         return md5(handle.read()).hexdigest()
