@@ -49,7 +49,7 @@ def configure_loggers():
     log_file_handler.setLevel(logging.DEBUG)
 
     root_formatter = logging.Formatter(
-        '%(asctime)s.%(msecs)03d - %(name)s - %(levelname)s - %(message)s')
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     log_file_handler.setFormatter(root_formatter)
     root_logger.addHandler(log_file_handler)
 
@@ -57,10 +57,12 @@ def configure_loggers():
     console_handler.setLevel(logging.WARNING)
 
     error_formatter = logging.Formatter(
-        '%(asctime)s.%(msecs)03d - %(name)s - %(levelname)s - %(message)s')
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     console_handler.setFormatter(error_formatter)
     root_logger.addHandler(console_handler)
     logging.Formatter.converter = time.gmtime
+    # See https://docs.python.org/3/library/logging.html#logging.Formatter.formatTime
+    logging.Formatter.default_msec_format = '%s.%03d'
 
 
 def main() -> None:
