@@ -2,6 +2,21 @@
 
 
 
+## v0.2.2 (2023-12-11)
+
+### Ci
+
+* ci: Only build if released ([`fdd7a3f`](https://github.com/UCSD-E4E/e4e-deduplication/commit/fdd7a3f2ef46053227b06144d2efabf1fbe74609))
+
+* ci: Fixes checkout ([`a1b0273`](https://github.com/UCSD-E4E/e4e-deduplication/commit/a1b0273b024023c9a7b0f515aa809b61fc1d9fdd))
+
+### Fix
+
+* fix: Updates log timestamps ([`92514f6`](https://github.com/UCSD-E4E/e4e-deduplication/commit/92514f693e88b22494835d24a883f17521403341))
+
+* fix: Fixes logging timestamp format ([`d518c7f`](https://github.com/UCSD-E4E/e4e-deduplication/commit/d518c7f22404029c1e029f56a902023ccfa947a0))
+
+
 ## v0.2.1 (2023-12-11)
 
 ### Ci
