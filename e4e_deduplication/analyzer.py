@@ -41,7 +41,8 @@ class Analyzer:
         Returns:
             List[Tuple[Path, str]]: List of pairs of path and digest
         """
-        paths_to_analyze = list(working_dir.rglob('*'))
+        paths_to_analyze = list(tqdm(working_dir.rglob('*'),
+                                     desc='Discovering files'))
         self.logger.info(f'Processing {len(paths_to_analyze)} files')
         with Pool() as pool:
             if strategy == 'map':
