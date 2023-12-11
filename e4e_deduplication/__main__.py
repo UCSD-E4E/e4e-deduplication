@@ -9,7 +9,7 @@ import time
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import TextIO
-
+import datetime as dt
 from appdirs import AppDirs
 
 from e4e_deduplication.analyzer import Analyzer
@@ -62,7 +62,9 @@ def configure_loggers():
     root_logger.addHandler(console_handler)
     logging.Formatter.converter = time.gmtime
     # See https://docs.python.org/3/library/logging.html#logging.Formatter.formatTime
-    logging.Formatter.default_msec_format = '%s.%03d'
+    # See https://stackoverflow.com/a/58777937
+    logging.Formatter.formatTime = (lambda self, record, datefmt=None: dt.datetime.fromtimestamp(
+        record.created, dt.timezone.utc).astimezone().isoformat())
 
 
 def main() -> None:
