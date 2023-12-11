@@ -2,6 +2,31 @@
 
 
 
+## v0.2.1 (2023-12-11)
+
+### Ci
+
+* ci: Adjusts release sequence ([`7509e85`](https://github.com/UCSD-E4E/e4e-deduplication/commit/7509e85624be4d5978c8c4949bfc611a4eee88cf))
+
+* ci: Fixes release ([`2c07596`](https://github.com/UCSD-E4E/e4e-deduplication/commit/2c07596e995a4be6b892e174b59cb72bbc64c3b0))
+
+### Documentation
+
+* docs: Fixes readme ([`495789d`](https://github.com/UCSD-E4E/e4e-deduplication/commit/495789d33a416750747b7cd5dcbd82d91d96f752))
+
+### Fix
+
+* fix: Fixes naive job file
+
+Merge pull request #3 from UCSD-E4E/naive_job_file ([`a9e57fb`](https://github.com/UCSD-E4E/e4e-deduplication/commit/a9e57fb3ea3a2101faa65cfeeb996b82362e922e))
+
+* fix: Allows for empty dict in job cache ([`98dfd56`](https://github.com/UCSD-E4E/e4e-deduplication/commit/98dfd56b139e41e4d9848d18670b0325e57a3219))
+
+### Style
+
+* style: Fixes docstring ([`e0f8192`](https://github.com/UCSD-E4E/e4e-deduplication/commit/e0f819242e8ce95a8c52d366eb8fec990d082b49))
+
+
 ## v0.2.0 (2023-12-11)
 
 ### Feature
