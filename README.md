@@ -1,4 +1,4 @@
-[![Pylint](https://github.com/UCSD-E4E/e4e-deduplication/actions/workflows/pylint.yml/badge.svg?branch=gh_actions)](https://github.com/UCSD-E4E/e4e-deduplication/actions/workflows/pylint.yml)
+[![Pylint](https://github.com/UCSD-E4E/e4e-deduplication/actions/workflows/pylint.yml/badge.svg)](https://github.com/UCSD-E4E/e4e-deduplication/actions/workflows/pylint.yml)
 [![pytest](https://github.com/UCSD-E4E/e4e-deduplication/actions/workflows/pytest.yml/badge.svg)](https://github.com/UCSD-E4E/e4e-deduplication/actions/workflows/pytest.yml)
 # E4E Deduplication Tool
 This tool iterates over a specified directory and generates a list of sha256 checksums.  Once completed it will output a report with a list of all of the duplicate files.
