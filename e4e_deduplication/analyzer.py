@@ -43,7 +43,7 @@ class Analyzer:
         """
         paths_to_analyze = list(working_dir.rglob('*'))
         self.logger.info(f'Processing {len(paths_to_analyze)} files')
-        with Pool(1) as pool:
+        with Pool() as pool:
             if strategy == 'map':
                 results = list(tqdm(map(
                     self._compute_file_hash, paths_to_analyze),
@@ -68,7 +68,8 @@ class Analyzer:
         Returns:
             Dict[str, Set[Path]]: Dictionary of digests and corresponding duplicated paths
         """
-        results = self.parallel_process_hashes(working_dir=working_dir)
+        results = self.parallel_process_hashes(
+            working_dir=working_dir, strategy='pool.imap_unordered')
         for path, digest in results:
             if digest in self.__cache:
                 self.__cache[digest].add(path.resolve())
@@ -98,11 +99,13 @@ class Analyzer:
                 continue
             matching_paths = self.__cache[digest]
             if path not in matching_paths:
+                # Hash matches, and this file is not in the reference set
                 paths_to_remove[path] = digest
                 if not dry_run:
                     path.unlink()
             else:
                 if len(matching_paths) > 1:
+                    # Hash matches, reference set has more than just this file
                     paths_to_remove[path] = digest
                     if not dry_run:
                         path.unlink()

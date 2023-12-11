@@ -5,19 +5,36 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "e4e_deduplication",
+            "name": "e4e_deduplication analyze",
             "type": "python",
             "request": "launch",
             "module": "e4e_deduplication",
             "justMyCode": true,
             "args": [
                 "-d",
-                ".venv",
+                ".venv/Scripts",
                 "-j",
                 "test",
                 "-e",
                 "dedup_ignore.txt",
                 "analyze"
+            ]
+        },
+        {
+            "name": "e4e_deduplication delete dry run",
+            "type": "python",
+            "request": "launch",
+            "module": "e4e_deduplication",
+            "justMyCode": true,
+            "args": [
+                "-d",
+                ".venv/Scripts",
+                "-j",
+                "test",
+                "-e",
+                "dedup_ignore.txt",
+                "--dry_run",
+                "delete"
             ]
         }
     ]

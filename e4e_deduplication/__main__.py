@@ -1,19 +1,39 @@
 """
 Provides a cli around the E4E deduplication module.
 """
+import contextlib
 import logging
 import logging.handlers
 import re
+import sys
 import time
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import List
+from typing import List, TextIO
 
 from appdirs import AppDirs
 
 from e4e_deduplication.analyzer import Analyzer
 
 app_dirs = AppDirs('e4e-deduplicator')
+
+
+def writer(spec: str) -> TextIO:
+    """Creates a writer for either stdout or a file
+
+    Args:
+        spec (str): Output specifier
+
+    Returns:
+        TextIO: Text IO object
+
+    Yields:
+        Iterator[TextIO]: stdout
+    """
+    @contextlib.contextmanager
+    def stdout():
+        yield sys.stdout
+    return open(spec, 'w', encoding='utf-8') if spec else stdout()
 
 
 def configure_loggers():
@@ -83,8 +103,8 @@ def main() -> None:
     parser.add_argument(
         '-a', '--analysis_dest',
         type=str,
-        default='stdout',
-        help='Analysis destination'
+        default='',
+        help='Analysis destination. Defaults to stdout (use "" for stdout)'
     )
 
     parser.add_argument(
@@ -124,10 +144,23 @@ def main() -> None:
         if args.clear_cache:
             app.clear_cache()
         if args.action == 'analyze':
-            report = app.analyze(working_dir=directory_path)
+            analysis_report = app.analyze(working_dir=directory_path)
         elif args.action == 'delete':
-            report = app.delete(working_dir=directory_path,
-                                dry_run=args.dry_run)
+            delete_report = app.delete(working_dir=directory_path,
+                                       dry_run=args.dry_run)
+
+    with writer(args.analysis_dest) as handle:
+        if args.action == 'analyze':
+            for digest, files in sorted(analysis_report.items(),
+                                        key=lambda x: len(x[1]),
+                                        reverse=True):
+                handle.write(
+                    f'File signature {digest} discovered {len(files)} times:\n')
+                for file in files:
+                    handle.write(f'\t{file.as_posix()}\n')
+        elif args.action == 'delete':
+            for file, digest in delete_report.items():
+                handle.write(f'Deleted {file.as_posix()} with hash {digest}\n')
 
 
 if __name__ == '__main__':
