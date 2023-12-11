@@ -24,10 +24,10 @@ jobs:
         poetry install -v --no-root
     - name: Test
       run: |
-        coverage run --branch -m pytest tests/
+        poetry run coverage run --branch -m pytest tests/
     - name: Generate Report
       run: |
-        coverage html
+        poetry run coverage html
     - name: Upload report
       uses: actions/upload-artifact@v3
       with:
