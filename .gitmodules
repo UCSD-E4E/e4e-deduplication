@@ -1,0 +1,3 @@
+[submodule "file_hasher/src/hash-library"]
+	path = file_hasher/src/hash-library
+	url = https://github.com/stbrumme/hash-library.git
