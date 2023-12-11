@@ -17,6 +17,8 @@ app_dirs = AppDirs('e4e-deduplicator')
 
 
 def configure_loggers():
+    """Configures the loggers
+    """
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.DEBUG)
     log_dest = Path(app_dirs.user_log_dir, 'e4e_dedup.log').resolve()
@@ -48,35 +50,41 @@ def main() -> None:
     configure_loggers()
     logger = logging.getLogger('get_args')
     parser = ArgumentParser(
-        description="Looks through a single directory and generates a list of duplicate files."
+        description='Looks through a single directory and generates a list of duplicate files.'
     )
 
     parser.add_argument(
-        "-d", "--directory", type=Path, required=True, help="The directory to work on."
+        '-d', '--directory',
+        type=Path,
+        required=True,
+        help='The directory to work on.'
     )
 
     parser.add_argument(
-        "-e", "--exclude", type=Path, default=None, help="Path to ignore file of absolute path regex patterns to exclude."
+        '-e', '--exclude',
+        type=Path,
+        default=None,
+        help='Path to ignore file of absolute path regex patterns to exclude.'
     )
 
     parser.add_argument(
-        "-j", "--job_name",
+        '-j', '--job_name',
         type=str,
         required=True,
-        help="Name of job cache to use."
+        help='Name of job cache to use.'
     )
 
     parser.add_argument(
         '--clear_cache',
-        action="store_true",
-        help="Clears the job cache."
+        action='store_true',
+        help='Clears the job cache.'
     )
 
     parser.add_argument(
-        "-a", "--analysis_dest",
+        '-a', '--analysis_dest',
         type=str,
         default='stdout',
-        help="Analysis destination"
+        help='Analysis destination'
     )
 
     parser.add_argument(
@@ -118,8 +126,9 @@ def main() -> None:
         if args.action == 'analyze':
             report = app.analyze(working_dir=directory_path)
         elif args.action == 'delete':
-            report = app.delete(working_dir=directory_path, dry_run=args.dry_run))
+            report = app.delete(working_dir=directory_path,
+                                dry_run=args.dry_run)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

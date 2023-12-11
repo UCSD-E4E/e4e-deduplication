@@ -3,13 +3,18 @@
 import logging
 import shutil
 from pathlib import Path
-from random import randbytes, randint, seed
+from random import randbytes, randint
 from tempfile import TemporaryDirectory
 
 from e4e_deduplication.analyzer import Analyzer
 
 
 def test_same_dir_dedup(test_analyzer: Analyzer):
+    """Tests deduplication in a nested directory
+
+    Args:
+        test_analyzer (Analyzer): Test Analyzer
+    """
     logger = logging.getLogger('same_dir_dedup')
     with TemporaryDirectory() as reference_dir:
         working_dir = Path(reference_dir).resolve()
@@ -39,6 +44,13 @@ def test_same_dir_dedup(test_analyzer: Analyzer):
 
 
 def test_separate_dir_dedup(test_analyzer: Analyzer):
+    """Tests separate directory deduplication behavior
+
+    Args:
+        test_analyzer (Analyzer): Test Analyzer
+    """
+    # pylint: disable=too-many-locals
+    # Disables too many locals to allow for debugging of tests
     logger = logging.getLogger('same_dir_dedup')
     with TemporaryDirectory() as reference_dir, TemporaryDirectory() as duplicate_dir:
         working_dir = Path(reference_dir).resolve()
@@ -65,3 +77,4 @@ def test_separate_dir_dedup(test_analyzer: Analyzer):
         results = test_analyzer.delete(working_dir=dupe_dir)
         assert len(results) == n_dupes
         assert len(list(dupe_dir.rglob('*'))) == 0
+        assert len(list(working_dir.rglob('*'))) == n_files

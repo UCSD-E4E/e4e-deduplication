@@ -15,6 +15,8 @@ from tqdm import tqdm
 
 
 class Analyzer:
+    """Hash Analyzer Application
+    """
 
     def __init__(self, ignore_pattern: re.Pattern, job_path: Path):
         self.__ignore_pattern: re.Pattern = ignore_pattern
@@ -22,17 +24,50 @@ class Analyzer:
         self.__cache: Dict[str, Set[Path]] = {}
         self.logger = logging.getLogger('Analyzer')
 
-    def parallel_process_hashes(self, working_dir: Path) -> List[Tuple[Path, str]]:
+    def parallel_process_hashes(self,
+                                working_dir: Path,
+                                *,
+                                strategy: str = 'pool.imap_unordered') -> List[Tuple[Path, str]]:
+        """Computes the hashes of all files in the given directory
+
+        Args:
+            working_dir (Path): Directory to process
+            strategy (str, optional): one of pool.imap_unordered, map. Defaults to
+                'pool.imap_unordered'.
+
+        Raises:
+            ValueError: Unknown strategy
+
+        Returns:
+            List[Tuple[Path, str]]: List of pairs of path and digest
+        """
         paths_to_analyze = list(working_dir.rglob('*'))
         self.logger.info(f'Processing {len(paths_to_analyze)} files')
         with Pool(1) as pool:
-            results = list(tqdm(map(
-                self._compute_file_hash, paths_to_analyze),
-                total=len(paths_to_analyze),
-                desc='Computing File Hashes'))
+            if strategy == 'map':
+                results = list(tqdm(map(
+                    self._compute_file_hash, paths_to_analyze),
+                    total=len(paths_to_analyze),
+                    desc='Computing File Hashes'))
+            elif strategy == 'pool.imap_unordered':
+                results = list(tqdm(pool.imap_unordered(
+                    self._compute_file_hash, paths_to_analyze),
+                    total=len(paths_to_analyze),
+                    desc='Computing File Hashes'))
+            else:
+                raise ValueError(f'Unknown strategy {strategy}')
         return [pair for pair in results if pair]
 
     def analyze(self, working_dir: Path) -> Dict[str, Set[Path]]:
+        """Analyzes the working directory for duplicated files.  Also updates the job cache with
+        every file encountered.
+
+        Args:
+            working_dir (Path): Directory to process
+
+        Returns:
+            Dict[str, Set[Path]]: Dictionary of digests and corresponding duplicated paths
+        """
         results = self.parallel_process_hashes(working_dir=working_dir)
         for path, digest in results:
             if digest in self.__cache:
@@ -45,7 +80,17 @@ class Analyzer:
                 duplicate_paths[digest] = paths
         return duplicate_paths
 
-    def delete(self, working_dir, *, dry_run: bool = False) -> Dict[Path, str]:
+    def delete(self, working_dir: Path, *, dry_run: bool = False) -> Dict[Path, str]:
+        """Deletes any files in the working directory that are duplicated elsewhere in this job.
+        Does not add any new files to the cache.
+
+        Args:
+            working_dir (Path): Directory to search for and delete duplicates in
+            dry_run (bool, optional): Dry run - suppress deletion if True. Defaults to False.
+
+        Returns:
+            Dict[Path, str]: Dictionary of paths and digests that were deleted
+        """
         results = self.parallel_process_hashes(working_dir=working_dir)
         paths_to_remove: Dict[Path, str] = {}
         for path, digest in results:
@@ -81,6 +126,8 @@ class Analyzer:
         self.save()
 
     def load(self) -> None:
+        """Loads the job cache from the job file
+        """
         expected_schema = schema.Schema(
             {
                 str: [str]
@@ -92,15 +139,19 @@ class Analyzer:
                     json.load(handle))
             for digest, paths in data.items():
                 if digest not in self.__cache:
-                    self.__cache[digest] = set([Path(path) for path in paths])
+                    self.__cache[digest] = {Path(path) for path in paths}
                 else:
                     self.__cache[digest].update([Path(path) for path in paths])
 
     def save(self) -> None:
+        """Saves the current cache to the job path
+        """
         self.__job_path.parent.mkdir(exist_ok=True, parents=True)
         with open(self.__job_path, 'w', encoding='utf-8') as handle:
             json.dump({digest: [path.as_posix() for path in paths]
                       for digest, paths in self.__cache.items()}, handle, indent=4)
 
     def clear_cache(self) -> None:
+        """Clears the job cache
+        """
         self.__cache = {}

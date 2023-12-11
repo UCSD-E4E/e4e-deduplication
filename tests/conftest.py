@@ -1,6 +1,5 @@
 '''Test Setup
 '''
-import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
