@@ -5,14 +5,68 @@ from __future__ import annotations
 import json
 import logging
 import re
-from multiprocessing.pool import ThreadPool as Pool
+from multiprocessing import Event, Queue
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from threading import Thread
+from typing import Callable, Dict, Iterable, List, Optional, Set, Tuple
 
 import schema
 from tqdm import tqdm
+from tqdm.contrib.concurrent import thread_map
 
 from pyfilehash.hasher import compute_sha256
+
+
+class ParallelHasher:
+    """Parallel Hashing Class
+    """
+    # pylint: disable=too-few-public-methods
+    # This is meant to be a single method class
+
+    def __init__(self,
+                 process_fn: Callable[[Path, str], None],
+                 ignore_pattern: re.Pattern):
+        """Initializes the Parallel Hashing Class
+
+        Args:
+            process_fn (Callable[[Path, str], None]): Processing Function to retrieve the results
+            ignore_pattern (re.Pattern): Regex pattern to use for ignore
+        """
+        self._result_queue = Queue()
+        self._process_fn = process_fn
+        self._ignore_pattern = ignore_pattern
+        self.__result_run_event = Event()
+
+    def run(self, paths: Iterable[Path], n_iter: int):
+        """Runs the parallel hasher
+
+        Args:
+            paths (Iterable[Path]): Iterable of paths to hash
+            n_iter (int): Number of iterations expected
+        """
+        self.__result_run_event.set()
+        accumulator = Thread(target=self._result_accumulator)
+        accumulator.start()
+        thread_map(self._compute_file_hash, paths,
+                   total=n_iter,
+                   desc='Computing File Hashes')
+        self.__result_run_event.clear()
+        accumulator.join()
+
+    def _result_accumulator(self):
+        while self.__result_run_event.is_set() or not self._result_queue.empty():
+            if not self._result_queue.empty():
+                pair = self._result_queue.get(timeout=0.1)
+                path, digest = pair
+                self._process_fn(path, digest)
+
+    def _compute_file_hash(self, path: Path) -> None:
+        if self._ignore_pattern and self._ignore_pattern.search(path.as_posix()):
+            return
+        if not path.is_file():
+            return
+        result = (path, compute_sha256(path))
+        self._result_queue.put(result)
 
 
 class Analyzer:
@@ -23,7 +77,15 @@ class Analyzer:
         self.__ignore_pattern: re.Pattern = ignore_pattern
         self.__job_path = job_path
         self.__cache: Dict[str, Set[Path]] = {}
+        self.__dry_run = False
+        self.__paths_to_remove: Dict[Path, str] = {}
         self.logger = logging.getLogger('Analyzer')
+
+    def __add_result_to_cache(self, path: Path, digest: str) -> None:
+        if digest in self.__cache:
+            self.__cache[digest].add(path.resolve())
+        else:
+            self.__cache[digest] = set([path.resolve()])
 
     def analyze(self, working_dir: Path) -> Dict[str, Set[Path]]:
         """Analyzes the working directory for duplicated files.  Also updates the job cache with
@@ -37,21 +99,30 @@ class Analyzer:
         """
         n_files = sum(1 for _ in working_dir.rglob('*'))
         self.logger.info(f'Processing {n_files} files')
-        with Pool() as pool:
-            for path, digest in tqdm(pool.imap(self._compute_file_hash, working_dir.rglob('*')),
-                                     total=n_files,
-                                     desc='Computing File Hashes'):
-                if digest is None:
-                    continue
-                if digest in self.__cache:
-                    self.__cache[digest].add(path.resolve())
-                else:
-                    self.__cache[digest] = set([path.resolve()])
+        hasher = ParallelHasher(
+            self.__add_result_to_cache, self.__ignore_pattern)
+        hasher.run(working_dir.rglob('*'), n_files)
         duplicate_paths: Dict[str, Set[Path]] = {}
         for digest, paths in tqdm(self.__cache.items(), desc='Retrieving Duplicates'):
             if len(paths) > 1:
                 duplicate_paths[digest] = paths
         return duplicate_paths
+
+    def __add_result_to_delete_queue(self, path: Path, digest: str) -> None:
+        if digest not in self.__cache:
+            return
+        matching_paths = self.__cache[digest]
+        if path not in matching_paths:
+            # Hash matches, and this file is not in the reference set
+            self.__paths_to_remove[path] = digest
+            if not self.__dry_run:
+                path.unlink()
+        else:
+            if len(matching_paths) > 1:
+                # Hash matches, reference set has more than just this file
+                self.__paths_to_remove[path] = digest
+                if not self.__dry_run:
+                    path.unlink()
 
     def delete(self, working_dir: Path, *, dry_run: bool = False) -> Dict[Path, str]:
         """Deletes any files in the working directory that are duplicated elsewhere in this job.
@@ -64,24 +135,15 @@ class Analyzer:
         Returns:
             Dict[Path, str]: Dictionary of paths and digests that were deleted
         """
-        results = self.parallel_process_hashes(working_dir=working_dir)
-        paths_to_remove: Dict[Path, str] = {}
-        for path, digest in tqdm(results, desc='Deleting Duplicates'):
-            if digest not in self.__cache:
-                continue
-            matching_paths = self.__cache[digest]
-            if path not in matching_paths:
-                # Hash matches, and this file is not in the reference set
-                paths_to_remove[path] = digest
-                if not dry_run:
-                    path.unlink()
-            else:
-                if len(matching_paths) > 1:
-                    # Hash matches, reference set has more than just this file
-                    paths_to_remove[path] = digest
-                    if not dry_run:
-                        path.unlink()
-        return paths_to_remove
+        n_files = sum(1 for _ in working_dir.rglob('*'))
+        self.logger.info(f'Processing {n_files} files')
+        self.__dry_run = dry_run
+        self.__paths_to_remove: Dict[Path, str] = {}
+        hasher = ParallelHasher(
+            self.__add_result_to_delete_queue, self.__ignore_pattern)
+        hasher.run(working_dir.rglob('*'), n_files)
+
+        return self.__paths_to_remove
 
     def _compute_file_hash(self, path: Path) -> Tuple[Path, Optional[str]]:
         self.logger.info(f'Processing {path}')
