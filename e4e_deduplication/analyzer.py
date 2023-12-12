@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool as Pool
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
@@ -25,43 +25,6 @@ class Analyzer:
         self.__cache: Dict[str, Set[Path]] = {}
         self.logger = logging.getLogger('Analyzer')
 
-    def parallel_process_hashes(self,
-                                working_dir: Path,
-                                *,
-                                strategy: str = 'pool.imap_unordered') -> List[Tuple[Path, str]]:
-        """Computes the hashes of all files in the given directory
-
-        Args:
-            working_dir (Path): Directory to process
-            strategy (str, optional): one of pool.imap_unordered, map. Defaults to
-                'pool.imap_unordered'.
-
-        Raises:
-            ValueError: Unknown strategy
-
-        Returns:
-            List[Tuple[Path, str]]: List of pairs of path and digest
-        """
-        paths_to_analyze = list(tqdm(working_dir.rglob('*'),
-                                     desc='Discovering files'))
-        self.logger.info(f'Processing {len(paths_to_analyze)} files')
-        with Pool() as pool:
-            if strategy == 'map':
-                results = list(tqdm(map(
-                    self._compute_file_hash, paths_to_analyze),
-                    total=len(paths_to_analyze),
-                    desc='Computing File Hashes'))
-            elif strategy == 'pool.imap_unordered':
-                results = list(tqdm(pool.imap_unordered(
-                    self._compute_file_hash, paths_to_analyze),
-                    total=len(paths_to_analyze),
-                    desc='Computing File Hashes'))
-            else:
-                raise ValueError(f'Unknown strategy {strategy}')
-        return list(tqdm((pair for pair in results if pair),
-                         desc='Dropping Dirs',
-                         total=len(results)))
-
     def analyze(self, working_dir: Path) -> Dict[str, Set[Path]]:
         """Analyzes the working directory for duplicated files.  Also updates the job cache with
         every file encountered.
@@ -72,13 +35,18 @@ class Analyzer:
         Returns:
             Dict[str, Set[Path]]: Dictionary of digests and corresponding duplicated paths
         """
-        results = self.parallel_process_hashes(
-            working_dir=working_dir, strategy='pool.imap_unordered')
-        for path, digest in tqdm(results, desc='Analyzing Results'):
-            if digest in self.__cache:
-                self.__cache[digest].add(path.resolve())
-            else:
-                self.__cache[digest] = set([path.resolve()])
+        n_files = sum(1 for _ in working_dir.rglob('*'))
+        self.logger.info(f'Processing {n_files} files')
+        with Pool() as pool:
+            for path, digest in tqdm(pool.imap(self._compute_file_hash, working_dir.rglob('*')),
+                                     total=n_files,
+                                     desc='Computing File Hashes'):
+                if digest is None:
+                    continue
+                if digest in self.__cache:
+                    self.__cache[digest].add(path.resolve())
+                else:
+                    self.__cache[digest] = set([path.resolve()])
         duplicate_paths: Dict[str, Set[Path]] = {}
         for digest, paths in tqdm(self.__cache.items(), desc='Retrieving Duplicates'):
             if len(paths) > 1:
@@ -115,14 +83,14 @@ class Analyzer:
                         path.unlink()
         return paths_to_remove
 
-    def _compute_file_hash(self, path: Path) -> Optional[Tuple[Path, str]]:
+    def _compute_file_hash(self, path: Path) -> Tuple[Path, Optional[str]]:
         self.logger.info(f'Processing {path}')
         if self.__ignore_pattern and self.__ignore_pattern.search(path.as_posix()):
             self.logger.debug(f'Dropping {path} due to regex')
-            return None
+            return (path, None)
         if not path.is_file():
             self.logger.debug(f'Dropping {path} due to not a file')
-            return None
+            return (path, None)
         return path, compute_sha256(path)
 
     def __enter__(self) -> Analyzer:
@@ -161,4 +129,4 @@ class Analyzer:
     def clear_cache(self) -> None:
         """Clears the job cache
         """
-        self.__cache = {}
+        self.__cache.clear()
