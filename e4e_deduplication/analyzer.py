@@ -12,6 +12,7 @@ from typing import Dict, List, Optional, Set, Tuple
 import schema
 from tqdm import tqdm
 
+from e4e_deduplication.job_cache import JobCache
 from pyfilehash.hasher import compute_sha256
 
 
@@ -22,7 +23,8 @@ class Analyzer:
     def __init__(self, ignore_pattern: re.Pattern, job_path: Path):
         self.__ignore_pattern: re.Pattern = ignore_pattern
         self.__job_path = job_path
-        self.__cache: Dict[str, Set[Path]] = {}
+        # self.__cache: Dict[str, Set[Path]] = {}
+        self.__cache: JobCache = JobCache(self.__job_path)
         self.logger = logging.getLogger('Analyzer')
 
     def parallel_process_hashes(self,
@@ -72,16 +74,18 @@ class Analyzer:
         """
         results = self.parallel_process_hashes(
             working_dir=working_dir, strategy='pool.imap_unordered')
-        for path, digest in results:
-            if digest in self.__cache:
-                self.__cache[digest].add(path.resolve())
-            else:
-                self.__cache[digest] = set([path.resolve()])
-        duplicate_paths: Dict[str, Set[Path]] = {}
-        for digest, paths in self.__cache.items():
-            if len(paths) > 1:
-                duplicate_paths[digest] = paths
-        return duplicate_paths
+        for path, digest in tqdm(results, desc='Analyzing Results'):
+            self.__cache.add(digest, path)
+            # if digest in self.__cache:
+            #     self.__cache[digest].add(path.resolve())
+            # else:
+            #     self.__cache[digest] = set([path.resolve()])
+        # duplicate_paths: Dict[str, Set[Path]] = {}
+        # for digest, paths in self.__cache.items():
+        #     if len(paths) > 1:
+        #         duplicate_paths[digest] = paths
+        # return duplicate_paths
+        return self.__cache.get_duplicates()
 
     def delete(self, working_dir: Path, *, dry_run: bool = False) -> Dict[Path, str]:
         """Deletes any files in the working directory that are duplicated elsewhere in this job.
@@ -133,30 +137,33 @@ class Analyzer:
     def load(self) -> None:
         """Loads the job cache from the job file
         """
-        expected_schema = schema.Schema(
-            {
-                schema.Optional(str): [str]
-            }
-        )
-        if self.__job_path.is_file():
-            with open(self.__job_path, 'r', encoding='utf-8') as handle:
-                data: Dict[str, List[str]] = expected_schema.validate(
-                    json.load(handle))
-            for digest, paths in data.items():
-                if digest not in self.__cache:
-                    self.__cache[digest] = {Path(path) for path in paths}
-                else:
-                    self.__cache[digest].update([Path(path) for path in paths])
+        self.__cache.open()
+        # expected_schema = schema.Schema(
+        #     {
+        #         schema.Optional(str): [str]
+        #     }
+        # )
+        # if self.__job_path.is_file():
+        #     with open(self.__job_path, 'r', encoding='utf-8') as handle:
+        #         data: Dict[str, List[str]] = expected_schema.validate(
+        #             json.load(handle))
+        #     for digest, paths in data.items():
+        #         if digest not in self.__cache:
+        #             self.__cache[digest] = {Path(path) for path in paths}
+        #         else:
+        #             self.__cache[digest].update([Path(path) for path in paths])
 
     def save(self) -> None:
         """Saves the current cache to the job path
         """
-        self.__job_path.parent.mkdir(exist_ok=True, parents=True)
-        with open(self.__job_path, 'w', encoding='utf-8') as handle:
-            json.dump({digest: [path.as_posix() for path in paths]
-                      for digest, paths in self.__cache.items()}, handle, indent=4)
+        self.__cache.close()
+        # self.__job_path.parent.mkdir(exist_ok=True, parents=True)
+        # with open(self.__job_path, 'w', encoding='utf-8') as handle:
+        #     json.dump({digest: [path.as_posix() for path in paths]
+        #               for digest, paths in self.__cache.items()}, handle, indent=4)
 
     def clear_cache(self) -> None:
         """Clears the job cache
         """
-        self.__cache = {}
+        # self.__cache = {}
+        self.__cache.clear_cache()

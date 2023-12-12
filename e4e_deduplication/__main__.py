@@ -123,7 +123,7 @@ def main() -> None:
 
     args = parser.parse_args()
     directory_path: Path = args.directory.resolve()
-    job_path = Path(app_dirs.user_data_dir, args.job_name).with_suffix('.json')
+    job_path = Path(app_dirs.user_data_dir, args.job_name).with_suffix('.db')
     logger.info(f'Using job path {job_path}')
 
     logger.info(f'Walking path {directory_path}')
