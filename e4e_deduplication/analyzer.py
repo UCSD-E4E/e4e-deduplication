@@ -58,7 +58,9 @@ class Analyzer:
                     desc='Computing File Hashes'))
             else:
                 raise ValueError(f'Unknown strategy {strategy}')
-        return [pair for pair in results if pair]
+        return list(tqdm((pair for pair in results if pair),
+                         desc='Dropping Dirs',
+                         total=len(results)))
 
     def analyze(self, working_dir: Path) -> Dict[str, Set[Path]]:
         """Analyzes the working directory for duplicated files.  Also updates the job cache with
@@ -72,13 +74,13 @@ class Analyzer:
         """
         results = self.parallel_process_hashes(
             working_dir=working_dir, strategy='pool.imap_unordered')
-        for path, digest in results:
+        for path, digest in tqdm(results, desc='Analyzing Results'):
             if digest in self.__cache:
                 self.__cache[digest].add(path.resolve())
             else:
                 self.__cache[digest] = set([path.resolve()])
         duplicate_paths: Dict[str, Set[Path]] = {}
-        for digest, paths in self.__cache.items():
+        for digest, paths in tqdm(self.__cache.items(), desc='Retrieving Duplicates'):
             if len(paths) > 1:
                 duplicate_paths[digest] = paths
         return duplicate_paths
@@ -96,7 +98,7 @@ class Analyzer:
         """
         results = self.parallel_process_hashes(working_dir=working_dir)
         paths_to_remove: Dict[Path, str] = {}
-        for path, digest in results:
+        for path, digest in tqdm(results, desc='Deleting Duplicates'):
             if digest not in self.__cache:
                 continue
             matching_paths = self.__cache[digest]
