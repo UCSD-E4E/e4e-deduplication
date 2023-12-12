@@ -2,6 +2,23 @@
 
 
 
+## v0.3.0 (2023-12-12)
+
+### Feature
+
+* feat: Adds progress bars
+
+Merge pull request #11 from UCSD-E4E/4-progress-bar-for-analysis-result-aggregation ([`6abf954`](https://github.com/UCSD-E4E/e4e-deduplication/commit/6abf9541667df21de1ee0bc848aedf040616034e))
+
+* feat: Adds progress bars ([`c45e590`](https://github.com/UCSD-E4E/e4e-deduplication/commit/c45e59037262e11d1ad26c8093b609d44853a6cb))
+
+### Unknown
+
+* Merge pull request #10 from UCSD-E4E/7-add-user-confirmation-for-clear_cache
+
+feat: Adds clear cache check ([`8572e57`](https://github.com/UCSD-E4E/e4e-deduplication/commit/8572e57aa3c72c0469000a655f19e59591fc2225))
+
+
 ## v0.2.2 (2023-12-11)
 
 ### Ci
@@ -9,6 +26,10 @@
 * ci: Only build if released ([`fdd7a3f`](https://github.com/UCSD-E4E/e4e-deduplication/commit/fdd7a3f2ef46053227b06144d2efabf1fbe74609))
 
 * ci: Fixes checkout ([`a1b0273`](https://github.com/UCSD-E4E/e4e-deduplication/commit/a1b0273b024023c9a7b0f515aa809b61fc1d9fdd))
+
+### Feature
+
+* feat: Adds clear cache check ([`74d310b`](https://github.com/UCSD-E4E/e4e-deduplication/commit/74d310bcef4cfda6e5d6d252c477b136dc60dde8))
 
 ### Fix
 
