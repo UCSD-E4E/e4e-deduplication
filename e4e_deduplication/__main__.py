@@ -9,7 +9,7 @@ import time
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import TextIO
-
+import datetime as dt
 from appdirs import AppDirs
 
 from e4e_deduplication.analyzer import Analyzer
@@ -49,7 +49,7 @@ def configure_loggers():
     log_file_handler.setLevel(logging.DEBUG)
 
     root_formatter = logging.Formatter(
-        '%(asctime)s.%(msecs)03d - %(name)s - %(levelname)s - %(message)s')
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     log_file_handler.setFormatter(root_formatter)
     root_logger.addHandler(log_file_handler)
 
@@ -57,10 +57,14 @@ def configure_loggers():
     console_handler.setLevel(logging.WARNING)
 
     error_formatter = logging.Formatter(
-        '%(asctime)s.%(msecs)03d - %(name)s - %(levelname)s - %(message)s')
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     console_handler.setFormatter(error_formatter)
     root_logger.addHandler(console_handler)
     logging.Formatter.converter = time.gmtime
+    # See https://docs.python.org/3/library/logging.html#logging.Formatter.formatTime
+    # See https://stackoverflow.com/a/58777937
+    logging.Formatter.formatTime = (lambda self, record, datefmt=None: dt.datetime.fromtimestamp(
+        record.created, dt.timezone.utc).astimezone().isoformat())
 
 
 def main() -> None:
@@ -127,6 +131,11 @@ def main() -> None:
     logger.info(f'Using job path {job_path}')
 
     logger.info(f'Walking path {directory_path}')
+    if args.clear_cache:
+        user_input = input(
+            'Clearing the cache is a destructive operation, proceed? [y/N]: ')
+        if user_input.lower().strip() != 'y':
+            return
 
     if args.exclude:
         ignore_path: Path = args.exclude
