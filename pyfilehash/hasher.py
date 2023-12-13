@@ -1,11 +1,12 @@
 '''Python Interface
 '''
+import os
 from pathlib import Path
 
 from file_hasher import HashType, compute_digest
 
 
-def compute_sha256(path: Path) -> str:
+def compute_sha256(path: str) -> str:
     """Computes the SHA256 hash of the given path
 
     Args:
@@ -17,9 +18,9 @@ def compute_sha256(path: Path) -> str:
     Returns:
         str: SHA256 hash digest
     """
-    if not path.is_file():
+    if not os.path.isfile(path):
         raise RuntimeError("Not a file")
-    return compute_digest(HashType.SHA256, path.as_posix())
+    return compute_digest(HashType.SHA256, path)
 
 
 def compute_sha1(path: Path) -> str:

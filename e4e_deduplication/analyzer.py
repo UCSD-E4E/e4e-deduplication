@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from multiprocessing import Event, Queue
 from pathlib import Path
@@ -13,6 +14,7 @@ from tqdm import tqdm
 from tqdm.contrib.concurrent import thread_map
 
 from e4e_deduplication.job_cache import JobCache
+from e4e_deduplication.utils import path_to_str
 from pyfilehash.hasher import compute_sha256
 
 
@@ -23,10 +25,10 @@ class ParallelHasher:
     # This is meant to be a single method class
 
     def __init__(self,
-                 process_fn: Callable[[Path, str], None],
+                 process_fn: Callable[[str, str], None],
                  ignore_pattern: re.Pattern,
                  *,
-                 hash_fn: Callable[[Path], str] = compute_sha256):
+                 hash_fn: Callable[[str], str] = compute_sha256):
         """Initializes the Parallel Hashing Class
 
         Args:
@@ -39,7 +41,7 @@ class ParallelHasher:
         self.__result_run_event = Event()
         self.__hash_fn = hash_fn
 
-    def run(self, paths: Iterable[Path], n_iter: int):
+    def run(self, paths: Iterable[str], n_iter: int):
         """Runs the parallel hasher
 
         Args:
@@ -62,10 +64,10 @@ class ParallelHasher:
                 path, digest = pair
                 self._process_fn(path, digest)
 
-    def _compute_file_hash(self, path: Path) -> None:
-        if self._ignore_pattern and self._ignore_pattern.search(path.as_posix()):
+    def _compute_file_hash(self, path: str) -> None:
+        if self._ignore_pattern and self._ignore_pattern.search(path):
             return
-        if not path.is_file():
+        if not os.path.isfile(path):
             return
         result = (path, self.__hash_fn(path))
         self._result_queue.put(result)
@@ -98,7 +100,7 @@ class Analyzer:
         self.logger.info(f'Processing {n_files} files')
         hasher = ParallelHasher(
             self.__cache.add, self.__ignore_pattern)
-        hasher.run(working_dir.rglob('*'), n_files)
+        hasher.run(path_to_str(working_dir.rglob('*')), n_files)
         return self.__cache.get_duplicates()
 
     def __add_result_to_delete_queue(self, path: Path, digest: str) -> None:

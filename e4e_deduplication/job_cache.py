@@ -49,7 +49,7 @@ class JobCache:
             )
             return {Path(row[0]) for row in res.fetchall()}
 
-    def add(self, path: Path, digest: str):
+    def add(self, path: str, digest: str):
         """Adds the path and digest to the job cache
 
         Args:
@@ -58,7 +58,7 @@ class JobCache:
         """
         with sqlite3.connect(self.__db_path) as _db, closing(_db.cursor()) as cur:
             cur.execute(
-                f'INSERT INTO hash_cache VALUES ("{path.as_posix()}", "{digest}")')
+                f'INSERT INTO hash_cache VALUES ("{Path(path).as_posix()}", "{digest}")')
             _db.commit()
 
     def get_duplicates(self) -> Dict[str, Set[Path]]:

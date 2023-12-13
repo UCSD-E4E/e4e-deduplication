@@ -5,6 +5,8 @@
 #include <string>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/functional.h>
+#include <pybind11/pytypes.h>
 #include "hash-library/sha256.h"
 #include "hash-library/sha1.h"
 #include "hash-library/sha3.h"
@@ -12,6 +14,26 @@
 #include "hash-library/crc32.h"
 
 namespace py = pybind11;
+class ParallelHasher
+{
+private:
+    std::function<std::string(std::string)> hash_fn;
+
+public:
+    ParallelHasher(const std::function<void(std::string, std::string)> process_fn,
+                   const std::function<std::string(std::string)> hash_fn,
+                   int n_cpus) : hash_fn(hash_fn){};
+    void run(int n_iter){};
+    void put(std::string path){
+
+    };
+    void join(void){
+
+    };
+    void _result_accumulator(void){
+
+    };
+};
 
 typedef enum HashType
 {
@@ -111,4 +133,12 @@ PYBIND11_MODULE(file_hasher, m)
         .value("SHA256", HASH_SHA256)
         .export_values();
     m.def("compute_digest", &compute_digest);
+
+    py::class_<ParallelHasher>(m, "ParallelHasher")
+        .def(py::init<const std::function<void(std::string, std::string)>,
+                      const std::function<std::string(std::string)>,
+                      int>())
+        .def("run", &ParallelHasher::run)
+        .def("put", &ParallelHasher::put)
+        .def("join", &ParallelHasher::join);
 }

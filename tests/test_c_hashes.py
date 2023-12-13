@@ -1,7 +1,8 @@
 '''Tests the C hashes
 '''
+from hashlib import md5, sha1, sha256
 from pathlib import Path
-from hashlib import sha256, sha1, md5
+
 import pytest
 
 import file_hasher
