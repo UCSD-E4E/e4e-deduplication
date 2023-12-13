@@ -3,15 +3,15 @@
 import logging
 import time
 from hashlib import md5, sha1, sha256
-from multiprocessing import Pool
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import List
+from typing import List, Tuple
 
 import pytest
 from utils import create_random_file
 
-from pyfilehash import hasher
+from e4e_deduplication.analyzer import ParallelHasher
+from pyfilehash.hasher import compute_md5, compute_sha1, compute_sha256
 
 
 # Note that for 4 files, the setup time for Pool does not outweigh the time penalty of Python
@@ -32,20 +32,21 @@ def test_sha256_parallel(n_files: int):
             new_file = Path(tmp_dir, f'rand_{file_idx:03d}')
             create_random_file(new_file, 128*1024*1024)
             files.append(new_file)
+        digests: List[Tuple[Path, str]] = []
         start = time.perf_counter()
-        with Pool() as pool:
-            digests = pool.map(python_sha256, files)
+        ParallelHasher(lambda x, y: digests.append(
+            (x, y)), None, hash_fn=python_sha256).run(files, n_files)
         end = time.perf_counter()
-        python_digests = {files[idx]: digests[idx]
-                          for idx in range(len(files))}
+        python_digests = dict(digests)
         python_time = end - start
 
+        digests: List[Tuple[Path, str]] = []
         start = time.perf_counter()
-        with Pool() as pool:
-            digests = pool.map(hasher.compute_sha256, files)
+        ParallelHasher(lambda x, y: digests.append(
+            (x, y)), None, hash_fn=compute_sha256).run(files, n_files)
         end = time.perf_counter()
         c_time = end - start
-        c_digests = {files[idx]: digests[idx] for idx in range(len(files))}
+        c_digests = dict(digests)
 
         assert python_digests == c_digests
         if c_time > python_time:
@@ -82,20 +83,21 @@ def test_sha1_parallel(n_files: int):
             new_file = Path(tmp_dir, f'rand_{file_idx:03d}')
             create_random_file(new_file, 128*1024*1024)
             files.append(new_file)
+        digests: List[Tuple[Path, str]] = []
         start = time.perf_counter()
-        with Pool() as pool:
-            digests = pool.map(python_sha1, files)
+        ParallelHasher(lambda x, y: digests.append(
+            (x, y)), None, hash_fn=python_sha1).run(files, n_files)
         end = time.perf_counter()
-        python_digests = {files[idx]: digests[idx]
-                          for idx in range(len(files))}
+        python_digests = dict(digests)
         python_time = end - start
 
+        digests: List[Tuple[Path, str]] = []
         start = time.perf_counter()
-        with Pool() as pool:
-            digests = pool.map(hasher.compute_sha1, files)
+        ParallelHasher(lambda x, y: digests.append(
+            (x, y)), None, hash_fn=compute_sha1).run(files, n_files)
         end = time.perf_counter()
         c_time = end - start
-        c_digests = {files[idx]: digests[idx] for idx in range(len(files))}
+        c_digests = dict(digests)
 
         assert python_digests == c_digests
         if c_time > python_time:
@@ -132,20 +134,21 @@ def test_md5_parallel(n_files: int):
             new_file = Path(tmp_dir, f'rand_{file_idx:03d}')
             create_random_file(new_file, 128*1024*1024)
             files.append(new_file)
+        digests: List[Tuple[Path, str]] = []
         start = time.perf_counter()
-        with Pool() as pool:
-            digests = pool.map(python_md5, files)
+        ParallelHasher(lambda x, y: digests.append(
+            (x, y)), None, hash_fn=python_md5).run(files, n_files)
         end = time.perf_counter()
-        python_digests = {files[idx]: digests[idx]
-                          for idx in range(len(files))}
+        python_digests = dict(digests)
         python_time = end - start
 
+        digests: List[Tuple[Path, str]] = []
         start = time.perf_counter()
-        with Pool() as pool:
-            digests = pool.map(hasher.compute_md5, files)
+        ParallelHasher(lambda x, y: digests.append(
+            (x, y)), None, hash_fn=compute_md5).run(files, n_files)
         end = time.perf_counter()
         c_time = end - start
-        c_digests = {files[idx]: digests[idx] for idx in range(len(files))}
+        c_digests = dict(digests)
 
         assert python_digests == c_digests
         if c_time > python_time:

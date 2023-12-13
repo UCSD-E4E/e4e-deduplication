@@ -11,6 +11,8 @@
 #include "hash-library/md5.h"
 #include "hash-library/crc32.h"
 
+namespace py = pybind11;
+
 typedef enum HashType
 {
     HASH_CRC32 = 0,
@@ -23,6 +25,7 @@ typedef enum HashType
 std::string compute_SHA256(std::ifstream &handle, uint8_t *buffer, const std::size_t buffer_size)
 {
     SHA256 hasher;
+    py::gil_scoped_release release;
     do
     {
         handle.read(reinterpret_cast<char *>(buffer), buffer_size);
@@ -33,6 +36,7 @@ std::string compute_SHA256(std::ifstream &handle, uint8_t *buffer, const std::si
 std::string compute_MD5(std::ifstream &handle, uint8_t *buffer, const std::size_t buffer_size)
 {
     MD5 hasher;
+    py::gil_scoped_release release;
     do
     {
         handle.read(reinterpret_cast<char *>(buffer), buffer_size);
@@ -43,6 +47,7 @@ std::string compute_MD5(std::ifstream &handle, uint8_t *buffer, const std::size_
 std::string compute_SHA1(std::ifstream &handle, uint8_t *buffer, const std::size_t buffer_size)
 {
     SHA1 hasher;
+    py::gil_scoped_release release;
     do
     {
         handle.read(reinterpret_cast<char *>(buffer), buffer_size);
@@ -53,6 +58,7 @@ std::string compute_SHA1(std::ifstream &handle, uint8_t *buffer, const std::size
 std::string compute_CRC32(std::ifstream &handle, uint8_t *buffer, const std::size_t buffer_size)
 {
     CRC32 hasher;
+    py::gil_scoped_release release;
     do
     {
         handle.read(reinterpret_cast<char *>(buffer), buffer_size);
@@ -63,6 +69,7 @@ std::string compute_CRC32(std::ifstream &handle, uint8_t *buffer, const std::siz
 std::string compute_SHA3(std::ifstream &handle, uint8_t *buffer, const std::size_t buffer_size)
 {
     SHA3 hasher;
+    py::gil_scoped_release release;
     do
     {
         handle.read(reinterpret_cast<char *>(buffer), buffer_size);
@@ -78,7 +85,6 @@ std::string (*compute_fn[])(std::ifstream &, uint8_t *, const std::size_t) = {
     compute_SHA256,
     compute_SHA3};
 
-namespace py = pybind11;
 std::string compute_digest(Hash_t hash_type, std::string path)
 {
     const std::size_t BUFFER_SIZE = 2 * 1024 * 1024;
