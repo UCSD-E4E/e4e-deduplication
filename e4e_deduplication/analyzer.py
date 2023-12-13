@@ -2,18 +2,16 @@
 '''
 from __future__ import annotations
 
-import json
 import logging
 import re
 from multiprocessing import Event, Queue
 from pathlib import Path
 from threading import Thread
-from typing import Callable, Dict, Iterable, List, Optional, Set, Tuple
+from typing import Callable, Dict, Iterable, Optional, Set, Tuple
 
-import schema
-from tqdm import tqdm
 from tqdm.contrib.concurrent import thread_map
 
+from e4e_deduplication.job_cache import JobCache
 from pyfilehash.hasher import compute_sha256
 
 
@@ -25,7 +23,9 @@ class ParallelHasher:
 
     def __init__(self,
                  process_fn: Callable[[Path, str], None],
-                 ignore_pattern: re.Pattern):
+                 ignore_pattern: re.Pattern,
+                 *,
+                 hash_fn: Callable[[Path], str] = compute_sha256):
         """Initializes the Parallel Hashing Class
 
         Args:
@@ -36,6 +36,7 @@ class ParallelHasher:
         self._process_fn = process_fn
         self._ignore_pattern = ignore_pattern
         self.__result_run_event = Event()
+        self.__hash_fn = hash_fn
 
     def run(self, paths: Iterable[Path], n_iter: int):
         """Runs the parallel hasher
@@ -65,7 +66,7 @@ class ParallelHasher:
             return
         if not path.is_file():
             return
-        result = (path, compute_sha256(path))
+        result = (path, self.__hash_fn(path))
         self._result_queue.put(result)
 
 
@@ -76,16 +77,10 @@ class Analyzer:
     def __init__(self, ignore_pattern: re.Pattern, job_path: Path):
         self.__ignore_pattern: re.Pattern = ignore_pattern
         self.__job_path = job_path
-        self.__cache: Dict[str, Set[Path]] = {}
+        self.__cache: JobCache = JobCache(self.__job_path)
         self.__dry_run = False
         self.__paths_to_remove: Dict[Path, str] = {}
         self.logger = logging.getLogger('Analyzer')
-
-    def __add_result_to_cache(self, path: Path, digest: str) -> None:
-        if digest in self.__cache:
-            self.__cache[digest].add(path.resolve())
-        else:
-            self.__cache[digest] = set([path.resolve()])
 
     def analyze(self, working_dir: Path) -> Dict[str, Set[Path]]:
         """Analyzes the working directory for duplicated files.  Also updates the job cache with
@@ -100,13 +95,9 @@ class Analyzer:
         n_files = sum(1 for _ in working_dir.rglob('*'))
         self.logger.info(f'Processing {n_files} files')
         hasher = ParallelHasher(
-            self.__add_result_to_cache, self.__ignore_pattern)
+            self.__cache.add, self.__ignore_pattern)
         hasher.run(working_dir.rglob('*'), n_files)
-        duplicate_paths: Dict[str, Set[Path]] = {}
-        for digest, paths in tqdm(self.__cache.items(), desc='Retrieving Duplicates'):
-            if len(paths) > 1:
-                duplicate_paths[digest] = paths
-        return duplicate_paths
+        return self.__cache.get_duplicates()
 
     def __add_result_to_delete_queue(self, path: Path, digest: str) -> None:
         if digest not in self.__cache:
@@ -165,28 +156,12 @@ class Analyzer:
     def load(self) -> None:
         """Loads the job cache from the job file
         """
-        expected_schema = schema.Schema(
-            {
-                schema.Optional(str): [str]
-            }
-        )
-        if self.__job_path.is_file():
-            with open(self.__job_path, 'r', encoding='utf-8') as handle:
-                data: Dict[str, List[str]] = expected_schema.validate(
-                    json.load(handle))
-            for digest, paths in data.items():
-                if digest not in self.__cache:
-                    self.__cache[digest] = {Path(path) for path in paths}
-                else:
-                    self.__cache[digest].update([Path(path) for path in paths])
+        self.__cache.open()
 
     def save(self) -> None:
         """Saves the current cache to the job path
         """
-        self.__job_path.parent.mkdir(exist_ok=True, parents=True)
-        with open(self.__job_path, 'w', encoding='utf-8') as handle:
-            json.dump({digest: [path.as_posix() for path in paths]
-                      for digest, paths in self.__cache.items()}, handle, indent=4)
+        self.__cache.close()
 
     def clear_cache(self) -> None:
         """Clears the job cache
