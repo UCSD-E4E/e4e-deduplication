@@ -9,6 +9,7 @@ from pathlib import Path
 from threading import Thread
 from typing import Callable, Dict, Iterable, Optional, Set, Tuple
 
+from tqdm import tqdm
 from tqdm.contrib.concurrent import thread_map
 
 from e4e_deduplication.job_cache import JobCache
@@ -92,7 +93,8 @@ class Analyzer:
         Returns:
             Dict[str, Set[Path]]: Dictionary of digests and corresponding duplicated paths
         """
-        n_files = sum(1 for _ in working_dir.rglob('*'))
+        n_files = sum(1 for _ in tqdm(
+            working_dir.rglob('*'), desc='Discovering files'))
         self.logger.info(f'Processing {n_files} files')
         hasher = ParallelHasher(
             self.__cache.add, self.__ignore_pattern)
