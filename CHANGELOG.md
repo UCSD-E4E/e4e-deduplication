@@ -2,6 +2,34 @@
 
 
 
+## v0.4.0 (2023-12-13)
+
+### Feature
+
+* feat: sqitches to sqlite3 and thread pool ([`1100593`](https://github.com/UCSD-E4E/e4e-deduplication/commit/1100593edba82b1306ce12260ec60dc1f7f59ff1))
+
+* feat: Switches to a parallel thread hasher ([`ee04599`](https://github.com/UCSD-E4E/e4e-deduplication/commit/ee04599928693f69bfb78ebc8461dc86dcd5b9eb))
+
+* feat: Switching to threadpool and optimizing dataflow ([`998fb60`](https://github.com/UCSD-E4E/e4e-deduplication/commit/998fb6045fdcb90613953abe74dac7bd1a8c6690))
+
+* feat: Implements sqlite3 backend ([`f87d9b8`](https://github.com/UCSD-E4E/e4e-deduplication/commit/f87d9b820a03d00e6cc5be75fbf8b4d1a1e4e0ba))
+
+### Fix
+
+* fix: Fixes GIL release ([`acc71f1`](https://github.com/UCSD-E4E/e4e-deduplication/commit/acc71f17410b423b98445f3cc540a7ec96731422))
+
+* fix: Re-adds the file discovery tqdm ([`6dcfc30`](https://github.com/UCSD-E4E/e4e-deduplication/commit/6dcfc30a6c097c0af1a26c1dc4babb4015f7b00c))
+
+### Unknown
+
+* Merge remote-tracking branch &#39;refs/remotes/origin/sqlite3_testing&#39;
+
+Conflicts:
+	e4e_deduplication/analyzer.py ([`8c22f01`](https://github.com/UCSD-E4E/e4e-deduplication/commit/8c22f011f780bfcf2102cad9441860b5cffbcd14))
+
+* Merge branch &#39;master&#39; into 8-possible-memory-leak ([`15427e4`](https://github.com/UCSD-E4E/e4e-deduplication/commit/15427e44a25683ed0d8ecc1f5747a12c7883d918))
+
+
 ## v0.3.0 (2023-12-12)
 
 ### Feature
