@@ -86,6 +86,15 @@
         "xstring": "cpp",
         "xtr1common": "cpp",
         "xtree": "cpp",
-        "xutility": "cpp"
-    }
+        "xutility": "cpp",
+        "condition_variable": "cpp",
+        "queue": "cpp",
+        "ranges": "cpp",
+        "span": "cpp",
+        "xstddef": "cpp"
+    },
+    "cmake.sourceDirectory": "D:/workspace/e4e/e4e_tools/e4e-deduplication/file_hasher",
+    "C_Cpp.default.defines": [
+        "USE_PYBIND11=1"
+    ],
 }

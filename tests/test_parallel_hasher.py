@@ -8,7 +8,7 @@ from tempfile import TemporaryDirectory
 from tqdm import tqdm
 from utils import create_random_file
 
-from file_hasher import ParallelHasher
+from file_hasher import ParallelHasher, HashType
 from e4e_deduplication.utils import path_to_str
 
 
@@ -26,19 +26,9 @@ class ParallelHashTester:
             path (str): File path
             digest (str): File digest
         """
+        print("Python process_fn")
         self.data[path] = digest
-
-    def hash_fn(self, path: str) -> str:
-        """Hashing Function
-
-        Args:
-            path (str): Path to hash
-
-        Returns:
-            str: Hash Digest
-        """
-        with open(path, 'rb') as handle:
-            return sha256(handle.read()).hexdigest()
+        print("Python process_fn done")
 
 
 def test_c_parallel_hasher():
@@ -48,7 +38,7 @@ def test_c_parallel_hasher():
     file_size = 1024
     test_class = ParallelHashTester()
     hasher = ParallelHasher(
-        test_class.process_fn, test_class.hash_fn, os.cpu_count())
+        test_class.process_fn, HashType.SHA256, 2)
     with TemporaryDirectory() as tmpdir:
         temp_dir = Path(tmpdir).resolve()
         file_paths = [temp_dir.joinpath(

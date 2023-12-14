@@ -20,7 +20,7 @@ def build(setup_kwargs):
         Pybind11Extension('file_hasher',
                           [str(src) for src in src_files
                            if src.name != 'digest.cpp' and src.parent.name != 'tests'],
-                          extra_compile_args=['-O3'],
+                          extra_compile_args=['-O3', '-DUSE_PYBIND11=1'],
                           language='c++',
                           cxx_std=11)
     ]
