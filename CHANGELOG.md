@@ -2,6 +2,21 @@
 
 
 
+## v0.5.1 (2023-12-15)
+
+### Ci
+
+* ci: Fixes wheel build ([`0ba6a84`](https://github.com/UCSD-E4E/e4e-deduplication/commit/0ba6a8406c8a4f74f6dca6afa61c546ef370ae74))
+
+* ci: Fixes release.yml to no longer require cibuildwheel ([`fff48f6`](https://github.com/UCSD-E4E/e4e-deduplication/commit/fff48f66e3b175d79a18470a454553535b1f00ef))
+
+### Fix
+
+* fix: Adds dynamic_ncols (#15) ([`e1a4bf3`](https://github.com/UCSD-E4E/e4e-deduplication/commit/e1a4bf30d20c516583992ae2ff8bd13dee57820f))
+
+* fix: Adds dynamic_ncols ([`adf6529`](https://github.com/UCSD-E4E/e4e-deduplication/commit/adf65293b97656e4179e822e743c4aa148a4179e))
+
+
 ## v0.5.0 (2023-12-15)
 
 ### Feature
