@@ -37,7 +37,7 @@ class Analyzer:
             Dict[str, Set[Path]]: Dictionary of digests and corresponding duplicated paths
         """
         n_files = sum(1 for _ in tqdm(
-            working_dir.rglob('*'), desc='Discovering files'))
+            working_dir.rglob('*'), desc='Discovering files', dynamic_ncols=True))
         self.logger.info(f'Processing {n_files} files')
         hasher = ParallelHasher(
             self.__cache.add, self.__ignore_pattern, hash_fn=compute_sha256)
