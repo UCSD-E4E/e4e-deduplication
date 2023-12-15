@@ -11,6 +11,23 @@ from tqdm import tqdm
 
 from e4e_deduplication.job_cache import JobCache
 from e4e_deduplication.parallel_hasher import ParallelHasher
+from hashlib import sha256
+
+
+def compute_sha256(path: Path) -> str:
+    """Computes the SHA256 sum
+
+    Args:
+        path (Path): Path to hash
+
+    Returns:
+        str: Digest
+    """
+    hasher = sha256()
+    with open(path, 'rb') as handle:
+        while blob := handle.read(2*1024*1024):
+            hasher.update(blob)
+    return hasher.hexdigest()
 
 
 class Analyzer:
@@ -39,7 +56,7 @@ class Analyzer:
             working_dir.rglob('*'), desc='Discovering files'))
         self.logger.info(f'Processing {n_files} files')
         hasher = ParallelHasher(
-            self.__cache.add, self.__ignore_pattern)
+            self.__cache.add, self.__ignore_pattern, hash_fn=compute_sha256)
         hasher.run(working_dir.rglob('*'), n_files)
         return self.__cache.get_duplicates()
 
@@ -75,7 +92,7 @@ class Analyzer:
         self.__dry_run = dry_run
         self.__paths_to_remove: Dict[Path, str] = {}
         hasher = ParallelHasher(
-            self.__add_result_to_delete_queue, self.__ignore_pattern)
+            self.__add_result_to_delete_queue, self.__ignore_pattern, hash_fn=compute_sha256)
         hasher.run(working_dir.rglob('*'), n_files)
 
         return self.__paths_to_remove

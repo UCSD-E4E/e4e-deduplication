@@ -21,15 +21,11 @@ autopep8 = "^2.0.4"
 coverage = "^7.3.2"
 
 [build-system]
-requires = ["poetry-core", "pybind11", "setuptools"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 e4e_deduplication = "e4e_deduplication.__main__:main"
-
-[tool.poetry.build]
-script = "build.py"
-generate-setup-file = true
 
 
 [tool.semantic_release]

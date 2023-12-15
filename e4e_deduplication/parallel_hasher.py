@@ -1,6 +1,7 @@
 '''Parallel Hasher
 '''
 import re
+from hashlib import sha256
 from multiprocessing import Condition, Event, Lock, Queue, cpu_count
 from pathlib import Path
 from queue import Empty
@@ -9,7 +10,21 @@ from typing import Callable, Iterable
 
 from tqdm import tqdm
 
-from pyfilehash.hasher import compute_sha256
+
+def compute_sha256(path: Path) -> str:
+    """Computes the SHA256 sum
+
+    Args:
+        path (Path): Path to hash
+
+    Returns:
+        str: Digest
+    """
+    hasher = sha256()
+    with open(path, 'rb') as handle:
+        while blob := handle.read(2*1024*1024):
+            hasher.update(blob)
+    return hasher.hexdigest()
 
 
 def _hasher(condition: Condition,

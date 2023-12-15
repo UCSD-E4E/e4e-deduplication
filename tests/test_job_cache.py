@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 from utils import create_random_file
 
 from e4e_deduplication.job_cache import JobCache
-from pyfilehash.hasher import compute_sha256
+from e4e_deduplication.analyzer import compute_sha256
 
 
 def test_create_db():
