@@ -73,7 +73,7 @@ class ParallelHasher:
         job_condition = Condition()
         job_queue = Queue()
         result_queue = Queue()
-        self._pb = tqdm(total=n_iter)
+        self._pb = tqdm(total=n_iter, dynamic_ncols=True)
         job_terminate.clear()
         processor_terminate.clear()
         accumulator = Thread(target=self._result_accumulator, kwargs={
