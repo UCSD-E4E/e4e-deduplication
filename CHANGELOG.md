@@ -2,6 +2,15 @@
 
 
 
+## v0.5.2 (2023-12-15)
+
+### Fix
+
+* fix: Switching to non-multiprocess Queue ([`f58cbaa`](https://github.com/UCSD-E4E/e4e-deduplication/commit/f58cbaacdaf17a76c3d8cf8e8b3990b0df2bfc60))
+
+* fix: Removes submodule ([`9f0685d`](https://github.com/UCSD-E4E/e4e-deduplication/commit/9f0685d7efad2b861389a79dd312a500d125ecae))
+
+
 ## v0.5.1 (2023-12-15)
 
 ### Ci
