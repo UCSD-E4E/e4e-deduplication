@@ -9,25 +9,9 @@ from typing import Dict, Set
 
 from tqdm import tqdm
 
+from e4e_deduplication.hasher import compute_sha256
 from e4e_deduplication.job_cache import JobCache
 from e4e_deduplication.parallel_hasher import ParallelHasher
-from hashlib import sha256
-
-
-def compute_sha256(path: Path) -> str:
-    """Computes the SHA256 sum
-
-    Args:
-        path (Path): Path to hash
-
-    Returns:
-        str: Digest
-    """
-    hasher = sha256()
-    with open(path, 'rb') as handle:
-        while blob := handle.read(2*1024*1024):
-            hasher.update(blob)
-    return hasher.hexdigest()
 
 
 class Analyzer:
