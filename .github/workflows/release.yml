@@ -65,11 +65,11 @@ jobs:
         #     CIBW_BUILD: "cp39-*64 cp310-*64 cp311-*64 cp312-*64"
         #     CIBW_BEFORE_BUILD: git submodule update --init --recursive && pip install .
         - name: Build wheels
-          run: python -m pip wheel -w DEST_DIR dist
+          run: python -m pip wheel -w dist .
     
         - uses: actions/upload-artifact@v3
           with:
-            path: ./dist/*.whl
+            path: ./dist/e4e_deduplication*.whl
 
   publish:
     runs-on: ubuntu-latest
