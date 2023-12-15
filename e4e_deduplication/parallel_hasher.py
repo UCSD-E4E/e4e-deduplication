@@ -1,14 +1,13 @@
 '''Parallel Hasher
 '''
 import re
-from multiprocessing import Condition, Event, Lock, Queue, cpu_count
+from multiprocessing import Condition, Event, Lock, cpu_count
 from pathlib import Path
-from queue import Empty
+from queue import Empty, Queue
 from threading import Thread
 from typing import Callable, Iterable
 
 from tqdm import tqdm
-
 
 from e4e_deduplication.hasher import compute_sha256
 
@@ -117,8 +116,6 @@ class ParallelHasher:
         with result_condition:
             result_condition.notify_all()
         accumulator.join()
-        job_queue.close()
-        result_queue.close()
         self._pb.close()
 
     def _result_accumulator(self,
