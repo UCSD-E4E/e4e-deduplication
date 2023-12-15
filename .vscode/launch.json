@@ -15,8 +15,11 @@
                 ".venv",
                 "-j",
                 "test",
+                "--clear_cache",
                 "-e",
                 "dedup_ignore.txt",
+                "-a",
+                "analyze.rpt",
                 "analyze"
             ]
         },
