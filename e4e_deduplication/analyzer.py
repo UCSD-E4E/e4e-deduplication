@@ -4,71 +4,14 @@ from __future__ import annotations
 
 import logging
 import re
-from multiprocessing import Event, Queue
 from pathlib import Path
-from threading import Thread
-from typing import Callable, Dict, Iterable, Optional, Set, Tuple
+from typing import Dict, Set
 
 from tqdm import tqdm
-from tqdm.contrib.concurrent import thread_map
 
+from e4e_deduplication.hasher import compute_sha256
 from e4e_deduplication.job_cache import JobCache
-from pyfilehash.hasher import compute_sha256
-
-
-class ParallelHasher:
-    """Parallel Hashing Class
-    """
-    # pylint: disable=too-few-public-methods
-    # This is meant to be a single method class
-
-    def __init__(self,
-                 process_fn: Callable[[Path, str], None],
-                 ignore_pattern: re.Pattern,
-                 *,
-                 hash_fn: Callable[[Path], str] = compute_sha256):
-        """Initializes the Parallel Hashing Class
-
-        Args:
-            process_fn (Callable[[Path, str], None]): Processing Function to retrieve the results
-            ignore_pattern (re.Pattern): Regex pattern to use for ignore
-        """
-        self._result_queue = Queue()
-        self._process_fn = process_fn
-        self._ignore_pattern = ignore_pattern
-        self.__result_run_event = Event()
-        self.__hash_fn = hash_fn
-
-    def run(self, paths: Iterable[Path], n_iter: int):
-        """Runs the parallel hasher
-
-        Args:
-            paths (Iterable[Path]): Iterable of paths to hash
-            n_iter (int): Number of iterations expected
-        """
-        self.__result_run_event.set()
-        accumulator = Thread(target=self._result_accumulator)
-        accumulator.start()
-        thread_map(self._compute_file_hash, paths,
-                   total=n_iter,
-                   desc='Computing File Hashes')
-        self.__result_run_event.clear()
-        accumulator.join()
-
-    def _result_accumulator(self):
-        while self.__result_run_event.is_set() or not self._result_queue.empty():
-            if not self._result_queue.empty():
-                pair = self._result_queue.get(timeout=0.1)
-                path, digest = pair
-                self._process_fn(path, digest)
-
-    def _compute_file_hash(self, path: Path) -> None:
-        if self._ignore_pattern and self._ignore_pattern.search(path.as_posix()):
-            return
-        if not path.is_file():
-            return
-        result = (path, self.__hash_fn(path))
-        self._result_queue.put(result)
+from e4e_deduplication.parallel_hasher import ParallelHasher
 
 
 class Analyzer:
@@ -97,7 +40,7 @@ class Analyzer:
             working_dir.rglob('*'), desc='Discovering files'))
         self.logger.info(f'Processing {n_files} files')
         hasher = ParallelHasher(
-            self.__cache.add, self.__ignore_pattern)
+            self.__cache.add, self.__ignore_pattern, hash_fn=compute_sha256)
         hasher.run(working_dir.rglob('*'), n_files)
         return self.__cache.get_duplicates()
 
@@ -133,20 +76,10 @@ class Analyzer:
         self.__dry_run = dry_run
         self.__paths_to_remove: Dict[Path, str] = {}
         hasher = ParallelHasher(
-            self.__add_result_to_delete_queue, self.__ignore_pattern)
+            self.__add_result_to_delete_queue, self.__ignore_pattern, hash_fn=compute_sha256)
         hasher.run(working_dir.rglob('*'), n_files)
 
         return self.__paths_to_remove
-
-    def _compute_file_hash(self, path: Path) -> Tuple[Path, Optional[str]]:
-        self.logger.info(f'Processing {path}')
-        if self.__ignore_pattern and self.__ignore_pattern.search(path.as_posix()):
-            self.logger.debug(f'Dropping {path} due to regex')
-            return (path, None)
-        if not path.is_file():
-            self.logger.debug(f'Dropping {path} due to not a file')
-            return (path, None)
-        return path, compute_sha256(path)
 
     def __enter__(self) -> Analyzer:
         self.load()
