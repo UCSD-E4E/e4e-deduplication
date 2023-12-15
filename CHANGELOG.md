@@ -2,6 +2,25 @@
 
 
 
+## v0.5.0 (2023-12-15)
+
+### Feature
+
+* feat: Uses python parallel hasher (#13) ([`c0351a5`](https://github.com/UCSD-E4E/e4e-deduplication/commit/c0351a51fdcfbe388a075137956ffa03d03f09c7))
+
+* feat: Switching to python hasher ([`11b14ca`](https://github.com/UCSD-E4E/e4e-deduplication/commit/11b14ca5145a3e8caff37e1413fc5a2955d598fc))
+
+* feat: Uses python parallel hasher ([`40a9eb1`](https://github.com/UCSD-E4E/e4e-deduplication/commit/40a9eb1bfc46c849fe0f94768d97187f71ab740e))
+
+### Fix
+
+* fix: Removes pybind11 dependency ([`7217838`](https://github.com/UCSD-E4E/e4e-deduplication/commit/7217838a3007d56a119eb591168d4655b70a8330))
+
+### Style
+
+* style: Refactors hash ([`5cd4ce9`](https://github.com/UCSD-E4E/e4e-deduplication/commit/5cd4ce9fc15791f91e4d32a67bf2ab0c7802e72c))
+
+
 ## v0.4.0 (2023-12-13)
 
 ### Feature
