@@ -17,7 +17,7 @@ def create_test_analyzer():
         Analyzer: Test Analyzer app
     """
     with TemporaryDirectory() as cache_dir:
-        job_path = Path(cache_dir, 'test.json')
+        job_path = Path(cache_dir, 'test')
         with Analyzer(ignore_pattern=None, job_path=job_path) as app:
             yield app
 

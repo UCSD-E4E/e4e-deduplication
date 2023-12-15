@@ -15,12 +15,12 @@ def test_create_db():
     """
     with TemporaryDirectory() as tmpdir:
         temp_dir = Path(tmpdir).resolve()
-        job_db = temp_dir.joinpath('test.db')
+        job_db = temp_dir.joinpath('test')
         with JobCache(job_db) as cache:
             assert cache
-            cache.add(job_db, 'asdf')
-            assert 'asdf' in cache
-            rows = cache['asdf']
+            cache.add(job_db, 'baadf00d')
+            assert 'baadf00d' in cache
+            rows = cache['baadf00d']
             assert len(rows) == 1
 
 
@@ -32,7 +32,7 @@ def test_loading():
     n_duplicate = 4
     with TemporaryDirectory() as tmpdir:
         temp_dir = Path(tmpdir).resolve()
-        job_db = temp_dir.joinpath('test.db')
+        job_db = temp_dir.joinpath('test')
         with JobCache(job_db) as cache:
             with TemporaryDirectory() as workingdir:
                 working_dir = Path(workingdir).resolve()
