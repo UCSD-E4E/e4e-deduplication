@@ -3,7 +3,6 @@
 import math
 from heapq import merge as heap_merge
 from multiprocessing import Condition, Event, Process, Queue, cpu_count
-from multiprocessing import current_process as current_thread
 from pathlib import Path
 from queue import Empty
 from shutil import copy
