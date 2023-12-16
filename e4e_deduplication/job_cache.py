@@ -33,7 +33,7 @@ class JobCache:
         """Opens the cache
         """
         # pylint: disable=consider-using-with
-        self.__hash_handle = open(self.__hash_path, 'w+', encoding='utf-8')
+        self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
         # Resource needs to exist beyond the scope of this function
         for line in self.__hash_handle:
             digest = line.split(',')[0]
@@ -85,14 +85,17 @@ class JobCache:
         self.__hash_handle.close()
         sort_file(self.__hash_path, self.__hash_path)
         # pylint: disable=consider-using-with
-        self.__hash_handle = open(self.__hash_path, 'w+', encoding='utf-8')
+        self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
         # resource needs to exist beyond the scope of this function
         self.__hash_handle.seek(0)
         n_lines = sum(1 for _ in self.__hash_handle)
         self.__hash_handle.seek(0)
         current_digest = None
         file_set = set()
-        for line in tqdm(self.__hash_handle, desc='Discovering Duplicates', total=n_lines):
+        for line in tqdm(self.__hash_handle,
+                         desc='Discovering Duplicates',
+                         total=n_lines,
+                         dynamic_ncols=True):
             line_digest = line.split(',')[0]
             if not current_digest:
                 current_digest = line_digest
@@ -102,6 +105,8 @@ class JobCache:
                 file_set = set()
                 current_digest = line_digest
             file_set.add(Path(line.split(',')[1]))
+        if len(file_set) > 1:
+            result[current_digest] = file_set
         return result
 
     def clear(self) -> None:
@@ -110,6 +115,6 @@ class JobCache:
         self.__hash_handle.close()
         self.__hash_path.unlink()
         # pylint: disable=consider-using-with
-        self.__hash_handle = open(self.__hash_path, 'w+', encoding='utf-8')
+        self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
         # resource needs to exist beyond the scope of this function
         self.__hash_cache.clear()
