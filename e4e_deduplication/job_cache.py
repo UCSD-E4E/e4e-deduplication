@@ -31,7 +31,9 @@ class JobCache:
     def open(self):
         """Opens the cache
         """
+        # pylint: disable=consider-using-with
         self.__hash_handle = open(self.__hash_path, 'w+', encoding='utf-8')
+        # Resource needs to exist beyond the scope of this function
         for line in self.__hash_handle:
             digest = line.split(',')[0]
             self.__hash_cache.add(bytes.fromhex(digest))
@@ -96,5 +98,7 @@ class JobCache:
         """
         self.__hash_handle.close()
         self.__hash_path.unlink()
+        # pylint: disable=consider-using-with
         self.__hash_handle = open(self.__hash_path, 'w+', encoding='utf-8')
+        # resource needs to exist beyond the scope of this function
         self.__hash_cache.clear()
