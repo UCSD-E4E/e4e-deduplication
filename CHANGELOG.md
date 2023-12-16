@@ -2,6 +2,41 @@
 
 
 
+## v0.6.0 (2023-12-16)
+
+### Ci
+
+* ci: Optimizes test ([`ef65ce1`](https://github.com/UCSD-E4E/e4e-deduplication/commit/ef65ce194f41fcb9f3d535d339087802b50d497b))
+
+* ci: Optimizes test fixture ([`80c9331`](https://github.com/UCSD-E4E/e4e-deduplication/commit/80c9331c785927aae4a3f113aa6f584915af2d38))
+
+* ci: supporting testing ([`54f8ae8`](https://github.com/UCSD-E4E/e4e-deduplication/commit/54f8ae8ec8d557bace56256b87f8baceb34b11ea))
+
+### Feature
+
+* feat: reduce sql db overhead (#17) ([`7200b03`](https://github.com/UCSD-E4E/e4e-deduplication/commit/7200b039a94787ea8044fa2c223cb4d656e90ca2))
+
+* feat: Switch to csv based hash cache ([`b023e79`](https://github.com/UCSD-E4E/e4e-deduplication/commit/b023e79d6b000337a05432c1a576ae0ca35981e3))
+
+### Fix
+
+* fix: Fixes cache behavior ([`a9c4b3f`](https://github.com/UCSD-E4E/e4e-deduplication/commit/a9c4b3f097b093c2ea1891e480ccf537e9916800))
+
+* fix: Removes extra prints ([`cdf08c4`](https://github.com/UCSD-E4E/e4e-deduplication/commit/cdf08c4de10652ddf3a76b7f6f2d84e920b281a9))
+
+* fix: Implements file sorter ([`1b2132b`](https://github.com/UCSD-E4E/e4e-deduplication/commit/1b2132bddd719fae10b3641fda977baba0d167a5))
+
+* fix: progress bar ([`fba9a28`](https://github.com/UCSD-E4E/e4e-deduplication/commit/fba9a28fd7e7a85487efea3af0222fd0a9161094))
+
+### Style
+
+* style: Removes unused import ([`67fde55`](https://github.com/UCSD-E4E/e4e-deduplication/commit/67fde5521a1e5478a0dd63ab0d0007a79ca26480))
+
+### Unknown
+
+* wip: Switching to filesort based duplication ([`8820a1f`](https://github.com/UCSD-E4E/e4e-deduplication/commit/8820a1f74039e5f1b665cf513652204329327b78))
+
+
 ## v0.5.2 (2023-12-15)
 
 ### Fix
