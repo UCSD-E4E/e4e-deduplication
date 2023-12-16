@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Dict, Set
 
 from tqdm import tqdm
+from e4e_deduplication.file_sort import sort_file
 
 
 class JobCache:
@@ -81,16 +82,26 @@ class JobCache:
             Dict[str, Set[Path]]: duplicates mapping
         """
         result: Dict[str, Set[Path]] = {}
-        for hash_value in tqdm(self.__hash_cache, desc='Finding Duplicates', dynamic_ncols=True):
-            digest = hash_value.hex()
-            self.__hash_handle.seek(0)
-            paths = []
-            for line in self.__hash_handle:
-                line_digest = line.split(',')[0]
-                if line_digest == digest:
-                    paths.append(Path(line.split(',')[1]))
-            if len(paths) > 1:
-                result[digest] = set(paths)
+        self.__hash_handle.close()
+        sort_file(self.__hash_path, self.__hash_path)
+        # pylint: disable=consider-using-with
+        self.__hash_handle = open(self.__hash_path, 'w+', encoding='utf-8')
+        # resource needs to exist beyond the scope of this function
+        self.__hash_handle.seek(0)
+        n_lines = sum(1 for _ in self.__hash_handle)
+        self.__hash_handle.seek(0)
+        current_digest = None
+        file_set = set()
+        for line in tqdm(self.__hash_handle, desc='Discovering Duplicates', total=n_lines):
+            line_digest = line.split(',')[0]
+            if not current_digest:
+                current_digest = line_digest
+            if line_digest != current_digest:
+                if len(file_set) > 1:
+                    result[current_digest] = file_set
+                file_set = set()
+                current_digest = line_digest
+            file_set.add(Path(line.split(',')[1]))
         return result
 
     def clear(self) -> None:
