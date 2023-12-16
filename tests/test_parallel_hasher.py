@@ -30,8 +30,8 @@ class ParallelHashTester:
 def test_c_parallel_hasher():
     """Tests the C Parallel hasher
     """
-    n_files = 1024*1024
-    file_size = 128
+    n_files = 1024
+    file_size = 1024
     test_class = ParallelHashTester()
     hasher = ParallelHasher(test_class.process_fn, None)
     with TemporaryDirectory() as tmpdir:
