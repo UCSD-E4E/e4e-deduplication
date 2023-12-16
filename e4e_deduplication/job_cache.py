@@ -2,10 +2,13 @@
 '''
 from __future__ import annotations
 
-import sqlite3
-from contextlib import closing
+import os
+from io import FileIO
 from pathlib import Path
 from typing import Dict, Set
+
+from tqdm import tqdm
+from e4e_deduplication.file_sort import sort_file
 
 
 class JobCache:
@@ -13,7 +16,14 @@ class JobCache:
     """
 
     def __init__(self, path: Path) -> None:
-        self.__db_path = path
+        if not path.exists():
+            path.mkdir(parents=True)
+        if path.exists():
+            if not path.is_dir():
+                raise RuntimeError('Not a directory!')
+        self.__hash_path = path.joinpath('hashes.csv')
+        self.__hash_handle: FileIO = None
+        self.__hash_cache: Set[bytes] = set()
 
     def __enter__(self) -> JobCache:
         self.open()
@@ -22,7 +32,13 @@ class JobCache:
     def open(self):
         """Opens the cache
         """
-        self.__create_table()
+        # pylint: disable=consider-using-with
+        self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
+        # Resource needs to exist beyond the scope of this function
+        for line in self.__hash_handle:
+            digest = line.split(',')[0]
+            self.__hash_cache.add(bytes.fromhex(digest))
+        self.__hash_handle.seek(0)
 
     def __exit__(self, exc, exv, exp) -> None:
         self.close()
@@ -30,24 +46,21 @@ class JobCache:
     def close(self):
         """Closes the cache
         """
-
-    def __create_table(self) -> None:
-        with sqlite3.connect(self.__db_path) as _db, closing(_db.cursor()) as cur:
-            cur.execute(
-                'CREATE TABLE IF NOT EXISTS hash_cache(path text, digest text)')
+        self.__hash_handle.close()
 
     def __contains__(self, digest: str) -> bool:
-        with sqlite3.connect(self.__db_path) as _db, closing(_db.cursor()) as cur:
-            res = cur.execute(
-                f"SELECT * FROM hash_cache where digest = '{digest}'")
-            return res.fetchone() is not None
+        return bytes.fromhex(digest) in self.__hash_cache
 
     def __getitem__(self, digest: str) -> Set[Path]:
-        with sqlite3.connect(self.__db_path) as _db, closing(_db.cursor()) as cur:
-            res = cur.execute(
-                f'SELECT path FROM hash_cache where digest = "{digest}"'
-            )
-            return {Path(row[0]) for row in res.fetchall()}
+        paths: Set[Path] = set()
+        self.__hash_handle.seek(0)
+        for line in self.__hash_handle:
+            line_digest = line.split(',')[0]
+            if line_digest != digest:
+                continue
+            paths.add(Path(line.split(',')[1]))
+        self.__hash_handle.seek(0)
+        return paths
 
     def add(self, path: Path, digest: str):
         """Adds the path and digest to the job cache
@@ -56,10 +69,11 @@ class JobCache:
             path (Path): Path of file
             digest (str): File digest
         """
-        with sqlite3.connect(self.__db_path) as _db, closing(_db.cursor()) as cur:
-            cur.execute(
-                f'INSERT INTO hash_cache VALUES ("{path.as_posix()}", "{digest}")')
-            _db.commit()
+        self.__hash_handle.seek(0, os.SEEK_END)
+        self.__hash_handle.writelines([f'{digest},{path.as_posix()}'])
+        self.__hash_handle.write('\n')
+        self.__hash_handle.seek(0)
+        self.__hash_cache.add(bytes.fromhex(digest))
 
     def get_duplicates(self) -> Dict[str, Set[Path]]:
         """Generates the mapping of duplicates
@@ -67,21 +81,40 @@ class JobCache:
         Returns:
             Dict[str, Set[Path]]: duplicates mapping
         """
-        with sqlite3.connect(self.__db_path) as _db, closing(_db.cursor()) as cur:
-            res = cur.execute('SELECT digest, path FROM hash_cache f1 WHERE digest IN '
-                              '(SELECT digest FROM hash_cache f2 WHERE f1.path <> f2.path)')
-            rows = res.fetchall()
         result: Dict[str, Set[Path]] = {}
-        for digest, path in rows:
-            if digest not in result:
-                result[digest] = {Path(path)}
-            else:
-                result[digest].add(Path(path))
+        self.__hash_handle.close()
+        sort_file(self.__hash_path, self.__hash_path)
+        # pylint: disable=consider-using-with
+        self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
+        # resource needs to exist beyond the scope of this function
+        self.__hash_handle.seek(0)
+        n_lines = sum(1 for _ in self.__hash_handle)
+        self.__hash_handle.seek(0)
+        current_digest = None
+        file_set = set()
+        for line in tqdm(self.__hash_handle,
+                         desc='Discovering Duplicates',
+                         total=n_lines,
+                         dynamic_ncols=True):
+            line_digest = line.split(',')[0]
+            if not current_digest:
+                current_digest = line_digest
+            if line_digest != current_digest:
+                if len(file_set) > 1:
+                    result[current_digest] = file_set
+                file_set = set()
+                current_digest = line_digest
+            file_set.add(Path(line.split(',')[1]))
+        if len(file_set) > 1:
+            result[current_digest] = file_set
         return result
 
     def clear(self) -> None:
         """Clears the job cache
         """
-        with sqlite3.connect(self.__db_path) as _db, closing(_db.cursor()) as cur:
-            cur.execute('DELETE FROM hash_cache')
-            _db.commit()
+        self.__hash_handle.close()
+        self.__hash_path.unlink()
+        # pylint: disable=consider-using-with
+        self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
+        # resource needs to exist beyond the scope of this function
+        self.__hash_cache.clear()
