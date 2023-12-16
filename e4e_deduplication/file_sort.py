@@ -67,18 +67,15 @@ class PoolMerger:
                 except Empty:
                     continue
                 if part1.stat().st_size == self.final_size:
-                    print(f'{current_thread().name} found sentinel at {part1.name}')
                     terminate.set()
                     condition.notify_all()
                     result_queue.put(part1)
                     return
                 if queue.empty():
-                    print(f'{current_thread().name} sleeping with {part1.name}')
                     queue.put(part1)
                     condition.wait(timeout=5)
                     continue
                 part2: Path = queue.get(block=False)
-            print(f'{current_thread().name} processing {part1.name} and {part2.name}')
             output_path = part1.parent.joinpath(f'{part1.stem}_{part2.stem}')
             with open(part1, 'r', encoding='utf-8') as handle1, \
                 open(part2, 'r', encoding='utf-8') as handle2, \
@@ -87,7 +84,6 @@ class PoolMerger:
             part1.unlink()
             part2.unlink()
             with condition:
-                print(f'{current_thread().name} putting {output_path.name}')
                 queue.put(output_path)
                 condition.notify()
 
