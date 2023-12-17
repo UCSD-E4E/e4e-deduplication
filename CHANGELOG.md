@@ -2,6 +2,15 @@
 
 
 
+## v0.7.0 (2023-12-17)
+
+### Feature
+
+* feat: Adds byte based progress bar (#18) ([`d8d2a07`](https://github.com/UCSD-E4E/e4e-deduplication/commit/d8d2a0781e49526c0eeeddf259f17a1e2a91aa2b))
+
+* feat: Adds byte based progress bar ([`27f9ec3`](https://github.com/UCSD-E4E/e4e-deduplication/commit/27f9ec317a519f020fc3bca3fc89109169f5dc69))
+
+
 ## v0.6.1 (2023-12-17)
 
 ### Fix
