@@ -2,6 +2,13 @@
 
 
 
+## v0.6.1 (2023-12-17)
+
+### Fix
+
+* fix: Fixes job cache handle initialization ([`ca3246d`](https://github.com/UCSD-E4E/e4e-deduplication/commit/ca3246d54db05cc8e31603a38fd13fe7364c3ea2))
+
+
 ## v0.6.0 (2023-12-16)
 
 ### Ci
