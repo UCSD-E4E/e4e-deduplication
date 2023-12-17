@@ -36,13 +36,59 @@ class Analyzer:
         Returns:
             Dict[str, Set[Path]]: Dictionary of digests and corresponding duplicated paths
         """
-        n_files = sum(1 for _ in tqdm(
-            working_dir.rglob('*'), desc='Discovering files', dynamic_ncols=True))
-        self.logger.info(f'Processing {n_files} files')
+        n_files = 0
+        n_bytes = 0
+        for path in tqdm(working_dir.rglob('*'),
+                         desc='Discovering files',
+                         dynamic_ncols=True):
+            n_files += 1
+            if path.is_file():
+                n_bytes += path.stat().st_size
+        self.logger.info(f'Processing {n_files} files ({n_bytes} bytes)')
+        # n_files = sum(1 for _ in tqdm(
+        #     working_dir.rglob('*'), desc='Discovering files', dynamic_ncols=True))
+        # self.logger.info(f'Processing {n_files} files')
         hasher = ParallelHasher(
-            self.__cache.add, self.__ignore_pattern, hash_fn=compute_sha256)
+            self.__cache.add,
+            self.__ignore_pattern,
+            hash_fn=compute_sha256,
+            n_bytes=n_bytes)
         hasher.run(working_dir.rglob('*'), n_files)
         return self.__cache.get_duplicates()
+
+    def delete(self, working_dir: Path, *, dry_run: bool = False) -> Dict[Path, str]:
+        """Deletes any files in the working directory that are duplicated elsewhere in this job.
+        Does not add any new files to the cache.
+
+        Args:
+            working_dir (Path): Directory to search for and delete duplicates in
+            dry_run (bool, optional): Dry run - suppress deletion if True. Defaults to False.
+
+        Returns:
+            Dict[Path, str]: Dictionary of paths and digests that were deleted
+        """
+        n_files = 0
+        n_bytes = 0
+        for path in tqdm(working_dir.rglob('*'),
+                         desc='Discovering files',
+                         dynamic_ncols=True):
+            n_files += 1
+            if path.is_file():
+                n_bytes += path.stat().st_size
+        self.logger.info(f'Processing {n_files} files ({n_bytes} bytes)')
+        # n_files = sum(1 for _ in tqdm(
+        #     working_dir.rglob('*'), desc='Discovering files', dynamic_ncols=True))
+        # self.logger.info(f'Processing {n_files} files')
+        self.__dry_run = dry_run
+        self.__paths_to_remove: Dict[Path, str] = {}
+        hasher = ParallelHasher(
+            self.__add_result_to_delete_queue,
+            self.__ignore_pattern,
+            hash_fn=compute_sha256,
+            n_bytes=n_bytes)
+        hasher.run(working_dir.rglob('*'), n_files)
+
+        return self.__paths_to_remove
 
     def __add_result_to_delete_queue(self, path: Path, digest: str) -> None:
         if digest not in self.__cache:
@@ -59,27 +105,6 @@ class Analyzer:
                 self.__paths_to_remove[path] = digest
                 if not self.__dry_run:
                     path.unlink()
-
-    def delete(self, working_dir: Path, *, dry_run: bool = False) -> Dict[Path, str]:
-        """Deletes any files in the working directory that are duplicated elsewhere in this job.
-        Does not add any new files to the cache.
-
-        Args:
-            working_dir (Path): Directory to search for and delete duplicates in
-            dry_run (bool, optional): Dry run - suppress deletion if True. Defaults to False.
-
-        Returns:
-            Dict[Path, str]: Dictionary of paths and digests that were deleted
-        """
-        n_files = sum(1 for _ in working_dir.rglob('*'))
-        self.logger.info(f'Processing {n_files} files')
-        self.__dry_run = dry_run
-        self.__paths_to_remove: Dict[Path, str] = {}
-        hasher = ParallelHasher(
-            self.__add_result_to_delete_queue, self.__ignore_pattern, hash_fn=compute_sha256)
-        hasher.run(working_dir.rglob('*'), n_files)
-
-        return self.__paths_to_remove
 
     def __enter__(self) -> Analyzer:
         self.load()

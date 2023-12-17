@@ -46,7 +46,8 @@ class ParallelHasher:
                  process_fn: Callable[[Path, str], None],
                  ignore_pattern: re.Pattern,
                  *,
-                 hash_fn: Callable[[Path], str] = compute_sha256):
+                 hash_fn: Callable[[Path], str] = compute_sha256,
+                 n_bytes: int = None):
         """Initializes the Parallel Hashing Class
 
         Args:
@@ -58,6 +59,7 @@ class ParallelHasher:
         self._pb = None
         self._pb_lock = Lock()
         self._hash_fn = hash_fn
+        self._n_bytes = n_bytes
 
     def run(self, paths: Iterable[Path], n_iter: int):
         """Runs the parallel hasher
@@ -74,6 +76,10 @@ class ParallelHasher:
         result_queue = Queue()
         self._pb = tqdm(total=n_iter, dynamic_ncols=True,
                         desc='Computing Hashes')
+        if self._n_bytes:
+            self._pb.total = self._n_bytes
+            self._pb.unit = 'B'
+            self._pb.unit_scale = 1
         job_terminate.clear()
         processor_terminate.clear()
         accumulator = Thread(target=self._result_accumulator, kwargs={
@@ -96,14 +102,19 @@ class ParallelHasher:
         for path in paths:
             if self._ignore_pattern and self._ignore_pattern.search(path.as_posix()):
                 with self._pb_lock:
-                    self._pb.update(n=1)
+                    if self._n_bytes:
+                        self._pb.update(n=path.stat().st_size)
+                    else:
+                        self._pb.update(n=1)
                 continue
             if not path.is_file():
-                with self._pb_lock:
-                    self._pb.update(n=1)
+                if self._n_bytes is None:
+                    with self._pb_lock:
+                        self._pb.update(n=1)
                 continue
-            with self._pb_lock:
-                self._pb.update(n=0.5)
+            if self._n_bytes is None:
+                with self._pb_lock:
+                    self._pb.update(n=0.5)
             with job_condition:
                 job_queue.put(path)
                 job_condition.notify()
@@ -135,5 +146,8 @@ class ParallelHasher:
                 continue
             path, digest = pair
             with self._pb_lock:
-                self._pb.update(n=0.5)
+                if self._n_bytes is None:
+                    self._pb.update(n=0.5)
+                else:
+                    self._pb.update(n=path.stat().st_size)
             self._process_fn(path, digest)
