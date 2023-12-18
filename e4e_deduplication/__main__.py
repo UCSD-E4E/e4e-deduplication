@@ -158,8 +158,8 @@ def main() -> None:
                                         reverse=True):
                 handle.write(
                     f'File signature {digest} discovered {len(files)} times:\n')
-                for file in files:
-                    handle.write(f'\t{file.as_posix()}\n')
+                for file, hostname in files:
+                    handle.write(f'\t{hostname}:{file.as_posix()}\n')
         elif args.action == 'delete':
             for file, digest in delete_report.items():
                 handle.write(f'Deleted {file.as_posix()} with hash {digest}\n')

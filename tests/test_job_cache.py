@@ -4,6 +4,7 @@ from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from time import perf_counter
+from random import randbytes
 
 from tqdm import tqdm
 
@@ -62,6 +63,28 @@ def test_big_cache(big_hash_cache: Path):
         assert in_cache is True
         assert paths
         assert (end - start) < 10
+
+
+def test_hostname_agnostic_load():
+    """Tests loading a hostname agnostic cache
+    """
+    n_lines = 1024
+    with TemporaryDirectory() as tmpdir:
+        temp_dir = Path(tmpdir)
+        hash_map = {}
+        with open(temp_dir.joinpath('hashes.csv'), 'w', encoding='utf-8') as handle:
+            for idx in range(n_lines):
+                digest = randbytes(32).hex()
+                path = temp_dir.joinpath(f'{idx}.bin')
+                handle.write(f'{digest},{path.as_posix()}')
+                handle.write('\n')
+                hash_map[digest] = path
+        cache = JobCache(temp_dir)
+        cache.open()
+        for digest, path in hash_map.items():
+            assert digest in cache
+            assert len(cache[digest]) == 1
+        cache.close()
 
 
 if __name__ == '__main__':

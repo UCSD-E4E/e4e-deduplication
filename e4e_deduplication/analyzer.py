@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import logging
 import re
+import socket
 from pathlib import Path
-from typing import Dict, Set
+from typing import Dict, Set, Tuple
 
 from tqdm import tqdm
 
@@ -25,8 +26,9 @@ class Analyzer:
         self.__dry_run = False
         self.__paths_to_remove: Dict[Path, str] = {}
         self.logger = logging.getLogger('Analyzer')
+        self.__current_hostname = socket.gethostname()
 
-    def analyze(self, working_dir: Path) -> Dict[str, Set[Path]]:
+    def analyze(self, working_dir: Path) -> Dict[str, Set[Tuple[Path, str]]]:
         """Analyzes the working directory for duplicated files.  Also updates the job cache with
         every file encountered.
 
@@ -94,7 +96,7 @@ class Analyzer:
         if digest not in self.__cache:
             return
         matching_paths = self.__cache[digest]
-        if path not in matching_paths:
+        if (path, self.__current_hostname) not in matching_paths:
             # Hash matches, and this file is not in the reference set
             self.__paths_to_remove[path] = digest
             if not self.__dry_run:
