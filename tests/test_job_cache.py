@@ -3,6 +3,7 @@
 from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from time import perf_counter
 
 from tqdm import tqdm
 
@@ -45,6 +46,22 @@ def test_loading():
                     cache.add(dupe_file, sha256(
                         src_file.as_posix().encode()).hexdigest())
                 assert len(cache.get_duplicates()) == n_duplicate
+
+
+def test_big_cache(big_hash_cache: Path):
+    """Tests that the cache object can take in a big hash cache
+
+    Args:
+        big_hash_cache (Path): Path to big hash cache
+    """
+    with JobCache(big_hash_cache) as cache:
+        start = perf_counter()
+        in_cache = 'fffffe9151b1b72580f81ef81391ad0e74c3c39f5af784ba68a0594754b790ae' in cache
+        paths = cache['fffffe9151b1b72580f81ef81391ad0e74c3c39f5af784ba68a0594754b790ae']
+        end = perf_counter()
+        assert in_cache is True
+        assert paths
+        assert (end - start) < 10
 
 
 if __name__ == '__main__':

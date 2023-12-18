@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from io import FileIO
 from pathlib import Path
-from typing import Dict, Set
+from typing import Dict, Set, List
 
 from tqdm import tqdm
 from e4e_deduplication.file_sort import sort_file
@@ -23,7 +23,7 @@ class JobCache:
                 raise RuntimeError('Not a directory!')
         self.__hash_path = path.joinpath('hashes.csv')
         self.__hash_handle: FileIO = None
-        self.__hash_cache: Set[bytes] = set()
+        self.__hash_cache: Dict[str, List[int]] = {}
 
     def __enter__(self) -> JobCache:
         self.open()
@@ -36,9 +36,21 @@ class JobCache:
         self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
         # Resource needs to exist beyond the scope of this function
         self.__hash_handle.seek(0)
-        for line in self.__hash_handle:
+        prev_line = 0
+        pb = tqdm(desc='Loading hash cache',
+                  total=self.__hash_path.stat().st_size,
+                  dynamic_ncols=True,
+                  unit='B',
+                  unit_scale=True)
+        while line := self.__hash_handle.readline():
             digest = line.split(',')[0]
-            self.__hash_cache.add(bytes.fromhex(digest))
+            if digest in self.__hash_cache:
+                self.__hash_cache[digest].append(prev_line + len(digest) + 1)
+            else:
+                self.__hash_cache[digest] = [prev_line + len(digest) + 1]
+            prev_line = self.__hash_handle.tell()
+            pb.update(len(line) + 1)
+        pb.close()
         self.__hash_handle.seek(0)
 
     def __exit__(self, exc, exv, exp) -> None:
@@ -50,16 +62,13 @@ class JobCache:
         self.__hash_handle.close()
 
     def __contains__(self, digest: str) -> bool:
-        return bytes.fromhex(digest) in self.__hash_cache
+        return digest in self.__hash_cache
 
     def __getitem__(self, digest: str) -> Set[Path]:
         paths: Set[Path] = set()
-        self.__hash_handle.seek(0)
-        for line in self.__hash_handle:
-            line_digest = line.split(',')[0]
-            if line_digest != digest:
-                continue
-            paths.add(Path(line.split(',')[1]))
+        for offset in self.__hash_cache[digest]:
+            self.__hash_handle.seek(offset)
+            paths.add(Path(self.__hash_handle.readline()))
         self.__hash_handle.seek(0)
         return paths
 
@@ -71,10 +80,14 @@ class JobCache:
             digest (str): File digest
         """
         self.__hash_handle.seek(0, os.SEEK_END)
+        line_start = self.__hash_handle.tell()
         self.__hash_handle.writelines([f'{digest},{path.as_posix()}'])
         self.__hash_handle.write('\n')
         self.__hash_handle.seek(0)
-        self.__hash_cache.add(bytes.fromhex(digest))
+        if digest in self.__hash_cache:
+            self.__hash_cache[digest].append(line_start + len(digest) + 1)
+        else:
+            self.__hash_cache[digest] = [line_start + len(digest) + 1]
 
     def get_duplicates(self) -> Dict[str, Set[Path]]:
         """Generates the mapping of duplicates
