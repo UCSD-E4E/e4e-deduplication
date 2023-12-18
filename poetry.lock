@@ -167,17 +167,6 @@ files = [
 ]
 
 [[package]]
-name = "contextlib2"
-version = "21.6.0"
-description = "Backports and enhancements for the contextlib module"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "contextlib2-21.6.0-py2.py3-none-any.whl", hash = "sha256:3fbdb64466afd23abaf6c977627b75b6139a5a3e8ce38405c5b413aed7a0471f"},
-    {file = "contextlib2-21.6.0.tar.gz", hash = "sha256:ab1e2bfe1d01d968e1b7e8d9023bc51ef3509bba217bb730cee3827e1ee82869"},
-]
-
-[[package]]
 name = "coverage"
 version = "7.3.3"
 description = "Code coverage measurement for Python"
@@ -591,20 +580,6 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)"]
 use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
-name = "schema"
-version = "0.7.5"
-description = "Simple data validation library"
-optional = false
-python-versions = "*"
-files = [
-    {file = "schema-0.7.5-py2.py3-none-any.whl", hash = "sha256:f3ffdeeada09ec34bf40d7d79996d9f7175db93b7a5065de0faa7f41083c1e6c"},
-    {file = "schema-0.7.5.tar.gz", hash = "sha256:f06717112c61895cabc4707752b88716e8420a8819d71404501e114f91043197"},
-]
-
-[package.dependencies]
-contextlib2 = ">=0.5.5"
-
-[[package]]
 name = "setuptools"
 version = "69.0.2"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
@@ -787,4 +762,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "59d0135cbe271d69d3ad0330b0eb23609542b01811a45dd26862c0314a24bb49"
+content-hash = "d71e788f0022dbdd3678b98ad243bc5337cd1ad10da5821b51a9cc3d95106c83"
