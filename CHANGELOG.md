@@ -2,6 +2,33 @@
 
 
 
+## v0.7.1 (2023-12-18)
+
+### Ci
+
+* ci: Fixes env ([`43a3fa0`](https://github.com/UCSD-E4E/e4e-deduplication/commit/43a3fa03a3b180dd256ca146b2028486ccbea290))
+
+* ci: Fixes poetry install ([`43c45bd`](https://github.com/UCSD-E4E/e4e-deduplication/commit/43c45bdb953aa62acf428215c8d82238edbb2b3c))
+
+* ci: Fixes pytest execution ([`8ae5a2f`](https://github.com/UCSD-E4E/e4e-deduplication/commit/8ae5a2f1fce3a98542b97847b96713b670a1ecfb))
+
+* ci: Adds nas_unzip ([`6537c11`](https://github.com/UCSD-E4E/e4e-deduplication/commit/6537c11814c92a1527a9af1df2ea35d2c7cd7b25))
+
+* ci: adding support for nas unzip ([`2cc2509`](https://github.com/UCSD-E4E/e4e-deduplication/commit/2cc2509cb648d4e7eec18ec6ecf960d0733b0fb1))
+
+### Fix
+
+* fix: Faster job cache (#20) ([`a113912`](https://github.com/UCSD-E4E/e4e-deduplication/commit/a1139127d8c405a788fa564de30bffb2c8657a10))
+
+* fix: Fixes synology_api version ([`67e5d9d`](https://github.com/UCSD-E4E/e4e-deduplication/commit/67e5d9dc9a5f46df5f1021af158a259bdff0f436))
+
+* fix: switching to internal offset dict ([`00b02af`](https://github.com/UCSD-E4E/e4e-deduplication/commit/00b02af08576045d344a25b0a6026bf02250fa97))
+
+### Style
+
+* style: Fixes style ([`8e975e0`](https://github.com/UCSD-E4E/e4e-deduplication/commit/8e975e0840d967084a90f8d9b670bfb8d94499bb))
+
+
 ## v0.7.0 (2023-12-17)
 
 ### Feature
