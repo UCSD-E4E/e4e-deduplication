@@ -22,6 +22,8 @@ jobs:
         python -m pip install --upgrade pip poetry
         poetry install
     - name: Test
+      env:
+        NAS_CREDS: ${{ secrets.NAS_CREDS }}
       run: |
         poetry run python -m coverage run --branch -m pytest tests/
     - name: Generate Report
