@@ -50,7 +50,8 @@ def get_big_hash_cache(creds) -> Path:
         path = Path(tmp_dir).resolve()
         if not Path('hashes.csv').is_file():
             nas_unzip(
-                network_path='smb://e4e-nas.ucsd.edu:6021/temp/github_actions/e4e-deduplication/big_hash_cache.zip',
+                network_path=('smb://e4e-nas.ucsd.edu:6021/temp/github_actions/e4e-deduplication'
+                              '/big_hash_cache.zip'),
                 output_path=path,
                 username=creds['username'],
                 password=creds['password']

@@ -37,11 +37,11 @@ class JobCache:
         # Resource needs to exist beyond the scope of this function
         self.__hash_handle.seek(0)
         prev_line = 0
-        pb = tqdm(desc='Loading hash cache',
-                  total=self.__hash_path.stat().st_size,
-                  dynamic_ncols=True,
-                  unit='B',
-                  unit_scale=True)
+        pb_ = tqdm(desc='Loading hash cache',
+                   total=self.__hash_path.stat().st_size,
+                   dynamic_ncols=True,
+                   unit='B',
+                   unit_scale=True)
         while line := self.__hash_handle.readline():
             digest = line.split(',')[0]
             if digest in self.__hash_cache:
@@ -49,8 +49,8 @@ class JobCache:
             else:
                 self.__hash_cache[digest] = [prev_line + len(digest) + 1]
             prev_line = self.__hash_handle.tell()
-            pb.update(len(line) + 1)
-        pb.close()
+            pb_.update(len(line) + 1)
+        pb_.close()
         self.__hash_handle.seek(0)
 
     def __exit__(self, exc, exv, exp) -> None:
