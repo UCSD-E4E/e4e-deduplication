@@ -234,3 +234,5 @@ $RECYCLE.BIN/
 
 data
 analyze.rpt
+credentials.json
+hashes.csv

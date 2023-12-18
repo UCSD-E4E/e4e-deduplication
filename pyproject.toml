@@ -19,6 +19,7 @@ pytest = "^7.4.3"
 autopep8 = "^2.0.4"
 coverage = "^7.3.2"
 numpy = "^1.26.2"
+nas-unzip = {git = "https://github.com/UCSD-E4E/synology-download.git"}
 
 [build-system]
 requires = ["poetry-core"]

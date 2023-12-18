@@ -436,6 +436,24 @@ files = [
 ]
 
 [[package]]
+name = "nas-unzip"
+version = "0.1.0"
+description = ""
+optional = false
+python-versions = "^3.8"
+files = []
+develop = false
+
+[package.dependencies]
+synology-api = "^0.5.1"
+
+[package.source]
+type = "git"
+url = "https://github.com/UCSD-E4E/synology-download.git"
+reference = "HEAD"
+resolved_reference = "06bb697206d5ca996db5721a3f5b3a5f962d47d7"
+
+[[package]]
 name = "numpy"
 version = "1.26.2"
 description = "Fundamental package for array computing in Python"
@@ -887,6 +905,22 @@ testing = ["build[virtualenv]", "filelock (>=3.4.0)", "flake8-2020", "ini2toml[l
 testing-integration = ["build[virtualenv] (>=1.0.3)", "filelock (>=3.4.0)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "packaging (>=23.1)", "pytest", "pytest-enabler", "pytest-xdist", "tomli", "virtualenv (>=13.0.0)", "wheel"]
 
 [[package]]
+name = "synology-api"
+version = "0.5.2"
+description = "Python Synology API Wrapper"
+optional = false
+python-versions = "*"
+files = [
+    {file = "synology-api-0.5.2.tar.gz", hash = "sha256:253920303d89542f5f02525fc2a0a9a8ba0776ba40ce2adbfc874ee8d19fc1ed"},
+    {file = "synology_api-0.5.2-py3-none-any.whl", hash = "sha256:cf68aff651a90fb2f575c9c48094c52f3a421f548ee379ab188cb067828d24de"},
+]
+
+[package.dependencies]
+requests = "*"
+setuptools = "*"
+urllib3 = "*"
+
+[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -1051,4 +1085,4 @@ requests = "*"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "a2f61e31728e99044b1f6a5c0338d5bf194019ffa21e27c6899da260c12de841"
+content-hash = "59d0135cbe271d69d3ad0330b0eb23609542b01811a45dd26862c0314a24bb49"
