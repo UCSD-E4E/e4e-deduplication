@@ -23,7 +23,6 @@ class Analyzer:
         self.__ignore_pattern: re.Pattern = ignore_pattern
         self.__job_path = job_path
         self.__cache: JobCache = JobCache(self.__job_path)
-        self.__dry_run = False
         self.__paths_to_remove: Dict[Path, str] = {}
         self.logger = logging.getLogger('Analyzer')
         self.__current_hostname = socket.gethostname()
@@ -58,13 +57,12 @@ class Analyzer:
         hasher.run(working_dir.rglob('*'), n_files)
         return self.__cache.get_duplicates()
 
-    def delete(self, working_dir: Path, *, dry_run: bool = False) -> Dict[Path, str]:
+    def delete(self, working_dir: Path) -> Dict[Path, str]:
         """Deletes any files in the working directory that are duplicated elsewhere in this job.
         Does not add any new files to the cache.
 
         Args:
             working_dir (Path): Directory to search for and delete duplicates in
-            dry_run (bool, optional): Dry run - suppress deletion if True. Defaults to False.
 
         Returns:
             Dict[Path, str]: Dictionary of paths and digests that were deleted
@@ -78,10 +76,6 @@ class Analyzer:
             if path.is_file():
                 n_bytes += path.stat().st_size
         self.logger.info(f'Processing {n_files} files ({n_bytes} bytes)')
-        # n_files = sum(1 for _ in tqdm(
-        #     working_dir.rglob('*'), desc='Discovering files', dynamic_ncols=True))
-        # self.logger.info(f'Processing {n_files} files')
-        self.__dry_run = dry_run
         self.__paths_to_remove: Dict[Path, str] = {}
         hasher = ParallelHasher(
             self.__add_result_to_delete_queue,
@@ -99,14 +93,10 @@ class Analyzer:
         if (path, self.__current_hostname) not in matching_paths:
             # Hash matches, and this file is not in the reference set
             self.__paths_to_remove[path] = digest
-            if not self.__dry_run:
-                path.unlink()
         else:
             if len(matching_paths) > 1:
                 # Hash matches, reference set has more than just this file
                 self.__paths_to_remove[path] = digest
-                if not self.__dry_run:
-                    path.unlink()
 
     def __enter__(self) -> Analyzer:
         self.load()

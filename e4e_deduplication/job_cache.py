@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import os
+import shutil
 import socket
 from io import FileIO
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Dict, List, Set, Tuple
-
+import logging
 from tqdm import tqdm
 
 from e4e_deduplication.file_sort import sort_file
@@ -18,6 +20,7 @@ class JobCache:
     """
 
     def __init__(self, path: Path) -> None:
+        self.__log = logging.getLogger(f'Job Cache {path.name}')
         if not path.exists():
             path.mkdir(parents=True)
         if path.exists():
@@ -160,3 +163,34 @@ class JobCache:
         self.__hash_handle.seek(0)
         self.__hash_cache.clear()
         self.__n_lines = 0
+
+    def set_unknown_hostnames(self, hostname: str = None) -> None:
+        """Sets the unknown hostnames
+
+        Args:
+            hostname (str, optional): Hostname to set. Defaults to the current machine.
+        """
+        with TemporaryDirectory() as tmpdir:
+            temp_dir = Path(tmpdir).resolve()
+            self.__hash_handle.seek(0)
+            if not hostname:
+                hostname = self.__current_hostname
+            with open(temp_dir.joinpath('hashes.csv'), 'w', encoding='utf-8') as handle:
+                shutil.copyfileobj(self.__hash_handle, handle)
+            with open(temp_dir.joinpath('hashes.csv'), 'r', encoding='utf-8') as handle:
+                self.__hash_handle.seek(0)
+                for line in handle:
+                    if line.strip() == '':
+                        continue
+                    parts = line.strip().split(',')
+                    if len(parts) < 2:
+                        self.__log.error(f'line {line} is invalid!')
+                        continue
+                    if len(parts) < 3:
+                        parts.append(hostname)
+                    if len(parts) != 3:
+                        self.__log.critical(
+                            f'Set Unknown Hostname logic failure! {line}')
+                        continue
+                    self.__hash_handle.write(
+                        f'{parts[0]},{parts[1]},{parts[2]}\n')

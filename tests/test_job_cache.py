@@ -87,5 +87,19 @@ def test_hostname_agnostic_load():
         cache.close()
 
 
+def test_upgrade_cache(big_hash_cache: Path):
+    """Tests that we can upgrade the cache
+
+    Args:
+        big_hash_cache (Path): Path to 2 column hash cache
+    """
+    with open(big_hash_cache.joinpath('hashes.csv'), 'r', encoding='utf-8') as handle:
+        assert any(len(line.strip().split(',')) != 3 for line in handle)
+    with JobCache(big_hash_cache) as job_cache:
+        job_cache.set_unknown_hostnames()
+    with open(big_hash_cache.joinpath('hashes.csv'), 'r', encoding='utf-8') as handle:
+        assert any(len(line.strip().split(',')) == 3 for line in handle)
+
+
 if __name__ == '__main__':
     test_loading()
