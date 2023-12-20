@@ -58,3 +58,8 @@ To reset the job cache and reanalyze `.venv`:
 ```
 e4e_deduplication -d .venv --clear_cache analyze
 ```
+
+To upgrade a hostname agnostic job cache:
+```
+e4e_deduplication_config upgrade_cache -j test_job 
+```

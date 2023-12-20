@@ -2,69 +2,85 @@
 Provides a cli around the E4E deduplication module.
 """
 import contextlib
+import datetime as dt
 import logging
 import logging.handlers
 import sys
 import time
 from argparse import ArgumentParser
+from importlib import metadata
 from pathlib import Path
 from typing import TextIO
-import datetime as dt
+
+import semantic_version
 from appdirs import AppDirs
 
 from e4e_deduplication.analyzer import Analyzer
 from e4e_deduplication.file_filter import load_ignore_pattern
 
-app_dirs = AppDirs('e4e-deduplicator')
 
+class Deduplicator:
+    def __init__(self):
+        self.__version = semantic_version.Version(
+            metadata.version('e4e-deduplication'))
+        self.__app_dirs = AppDirs(
+            'e4e-deduplicator', version=self.__version.major)
+        commands = [
+            'analyze',
+            'delete',
+            'upgrade_cache',
+            'export_cache',
+            'info',
+        ]
 
-def writer(spec: str) -> TextIO:
-    """Creates a writer for either stdout or a file
+    def output_writer(self, spec: str) -> TextIO:
+        """Creates a writer for either stdout or a file
 
-    Args:
-        spec (str): Output specifier
+        Args:
+            spec (str): Output specifier
 
-    Returns:
-        TextIO: Text IO object
+        Returns:
+            TextIO: Text IO object
 
-    Yields:
-        Iterator[TextIO]: stdout
-    """
-    @contextlib.contextmanager
-    def stdout():
-        yield sys.stdout
-    return open(spec, 'w', encoding='utf-8') if spec else stdout()
+        Yields:
+            Iterator[TextIO]: stdout
+        """
+        @contextlib.contextmanager
+        def stdout():
+            yield sys.stdout
+        return open(spec, 'w', encoding='utf-8') if spec else stdout()
 
+    def configure_loggers(self):
+        """Configures the loggers
+        """
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.DEBUG)
+        log_dest = Path(self.__app_dirs.user_log_dir,
+                        'e4e_dedup.log').resolve()
+        log_dest.parent.mkdir(exist_ok=True, parents=True)
+        log_file_handler = logging.handlers.RotatingFileHandler(log_dest,
+                                                                maxBytes=5*1024*1024,
+                                                                backupCount=5)
+        log_file_handler.setLevel(logging.DEBUG)
 
-def configure_loggers():
-    """Configures the loggers
-    """
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG)
-    log_dest = Path(app_dirs.user_log_dir, 'e4e_dedup.log').resolve()
-    log_dest.parent.mkdir(exist_ok=True, parents=True)
-    log_file_handler = logging.handlers.RotatingFileHandler(log_dest,
-                                                            maxBytes=5*1024*1024,
-                                                            backupCount=5)
-    log_file_handler.setLevel(logging.DEBUG)
+        root_formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        log_file_handler.setFormatter(root_formatter)
+        root_logger.addHandler(log_file_handler)
 
-    root_formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    log_file_handler.setFormatter(root_formatter)
-    root_logger.addHandler(log_file_handler)
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.WARNING)
 
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.WARNING)
-
-    error_formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    console_handler.setFormatter(error_formatter)
-    root_logger.addHandler(console_handler)
-    logging.Formatter.converter = time.gmtime
-    # See https://docs.python.org/3/library/logging.html#logging.Formatter.formatTime
-    # See https://stackoverflow.com/a/58777937
-    logging.Formatter.formatTime = (lambda self, record, datefmt=None: dt.datetime.fromtimestamp(
-        record.created, dt.timezone.utc).astimezone().isoformat())
+        error_formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        console_handler.setFormatter(error_formatter)
+        root_logger.addHandler(console_handler)
+        logging.Formatter.converter = time.gmtime
+        # See https://docs.python.org/3/library/logging.html#logging.Formatter.formatTime
+        # See https://stackoverflow.com/a/58777937
+        logging.Formatter.formatTime = (
+            lambda self, record, datefmt=None: dt.datetime.fromtimestamp(
+                record.created, dt.timezone.utc).astimezone().isoformat())
 
 
 def main() -> None:
