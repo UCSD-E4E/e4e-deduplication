@@ -39,6 +39,7 @@ class Analyzer:
         """
         n_files = 0
         n_bytes = 0
+
         for path in tqdm(working_dir.rglob('*'),
                          desc='Discovering files',
                          dynamic_ncols=True):
@@ -46,9 +47,7 @@ class Analyzer:
             if path.is_file():
                 n_bytes += path.stat().st_size
         self.logger.info(f'Processing {n_files} files ({n_bytes} bytes)')
-        # n_files = sum(1 for _ in tqdm(
-        #     working_dir.rglob('*'), desc='Discovering files', dynamic_ncols=True))
-        # self.logger.info(f'Processing {n_files} files')
+
         hasher = ParallelHasher(
             self.__cache.add,
             self.__ignore_pattern,

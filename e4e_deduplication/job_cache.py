@@ -125,26 +125,34 @@ class JobCache:
             self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
             # resource needs to exist beyond the scope of this function
             self.__hash_handle.seek(0)
+            self.__rebuild_cache()
             self.__sorted = True
         if not self.__n_lines:
             self.__hash_handle.seek(0)
             self.__n_lines = sum(1 for _ in self.__hash_handle)
             self.__hash_handle.seek(0)
+        self.__log.info(
+            f'Cache has {self.__n_lines} lines, {len(self.__hash_cache)} cache entries')
+        n_offsets = 0
         for digest, offsets in tqdm(self.__hash_cache.items(),
                                     dynamic_ncols=True,
                                     desc='Discovering Duplicates'):
             if len(offsets) == 1:
+                n_offsets += 1
                 continue
             file_set = set()
             for offset in offsets:
-                file_set.add(self.__extract_path_hostname(offset))
+                path_hostname_pair = self.__extract_path_hostname(offset)
+                file_set.add(path_hostname_pair)
+                n_offsets += 1
             result[digest] = file_set
+        self.__log.debug(f'{n_offsets} offsets discovered')
 
         return result
 
     def __extract_path_hostname(self, offset: int) -> Tuple[Path, str]:
         self.__hash_handle.seek(offset)
-        line = self.__hash_handle.readline()
+        line = self.__hash_handle.readline().strip()
         path = Path(line.split(',')[0])
         try:
             hostname = line.split(',')[1]
