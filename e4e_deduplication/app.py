@@ -188,6 +188,8 @@ class Deduplicator:
                 handle.write(del_fmt.format(
                     path=str(file), digest=digest) + '\n')
 
+        script_dest.chmod(0o766)
+
     def __configure_upgrade_cache_parser(self, parser: ArgumentParser):
         parser.add_argument('-j', '--job_name',
                             help='name of job cache to use',
