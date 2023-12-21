@@ -27,7 +27,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-e4e_deduplication = "e4e_deduplication.__main__:main"
+e4e_deduplication = "e4e_deduplication.app:main"
 
 
 [tool.semantic_release]

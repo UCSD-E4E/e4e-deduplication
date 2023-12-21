@@ -12,7 +12,7 @@ import time
 from argparse import ArgumentParser
 from importlib import metadata
 from pathlib import Path
-from typing import TextIO
+from typing import TextIO, Any
 
 import semantic_version
 from appdirs import AppDirs
@@ -26,11 +26,14 @@ class Deduplicator:
     """Deduplicator Application
     """
 
-    def __init__(self):
+    def __init__(self, *, app_dirs: Any = None):
         self.__version = semantic_version.Version(
             metadata.version('e4e-deduplication'))
-        self.__app_dirs = AppDirs(
-            'e4e-deduplicator', version=self.__version.major)
+        if app_dirs:
+            self.__app_dirs = app_dirs
+        else:
+            self.__app_dirs = AppDirs(
+                'e4e-deduplicator', version=self.__version.major)
         self.configure_loggers()
         self.__log = logging.getLogger('Deduplicator')
         commands = {
@@ -143,7 +146,7 @@ class Deduplicator:
                 exclude: Path,
                 job_name: str,
                 script_dest: Path,
-                shell: str):
+                shell: str = None):
         # pylint: disable=too-many-arguments,too-many-locals
         # Required for CLI args, process orchestration
         job_path = Path(self.__app_dirs.user_data_dir, job_name).resolve()
@@ -171,8 +174,8 @@ class Deduplicator:
             'nt': 'cmd'
         }
         shell_delete_map = {
-            'cmd': 'del /f "{path}" &:: {digest}',
-            'ps': 'Remove-Item -Path "{path}" -Force # {digest}',
+            'cmd': 'del /f {path} &:: {digest}',
+            'ps': 'Remove-Item -Path {path} -Force # {digest}',
             'sh': 'rm -f {path} # {digest}'
         }
         if shell:
@@ -183,7 +186,7 @@ class Deduplicator:
         with self.output_writer(script_dest.as_posix()) as handle:
             for file, digest in delete_report.items():
                 handle.write(del_fmt.format(
-                    path=file.as_posix(), digest=digest) + '\n')
+                    path=str(file), digest=digest) + '\n')
 
     def __configure_upgrade_cache_parser(self, parser: ArgumentParser):
         parser.add_argument('-j', '--job_name',
@@ -262,15 +265,15 @@ class Deduplicator:
         log_dest = Path(self.__app_dirs.user_log_dir,
                         'e4e_dedup.log').resolve()
         log_dest.parent.mkdir(exist_ok=True, parents=True)
-        log_file_handler = logging.handlers.RotatingFileHandler(log_dest,
-                                                                maxBytes=5*1024*1024,
-                                                                backupCount=5)
-        log_file_handler.setLevel(logging.DEBUG)
+        self.__log_file_handler = logging.handlers.RotatingFileHandler(log_dest,
+                                                                       maxBytes=5*1024*1024,
+                                                                       backupCount=5)
+        self.__log_file_handler.setLevel(logging.DEBUG)
 
         root_formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        log_file_handler.setFormatter(root_formatter)
-        root_logger.addHandler(log_file_handler)
+        self.__log_file_handler.setFormatter(root_formatter)
+        root_logger.addHandler(self.__log_file_handler)
 
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.WARNING)
@@ -285,6 +288,12 @@ class Deduplicator:
         logging.Formatter.formatTime = (
             lambda self, record, datefmt=None: dt.datetime.fromtimestamp(
                 record.created, dt.timezone.utc).astimezone().isoformat())
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc, exv, exp):
+        self.__log_file_handler.close()
 
     def main(self):
         """Main entry point
@@ -301,7 +310,8 @@ def main() -> None:
     """
     Entry point for the CLI.
     """
-    Deduplicator().main()
+    with Deduplicator() as app:
+        app.main()
 
 
 if __name__ == '__main__':
