@@ -2,6 +2,13 @@
 
 
 
+## v1.1.0 (2023-12-21)
+
+### Feature
+
+* feat: Adds list jobs ([`cbe46b8`](https://github.com/UCSD-E4E/e4e-deduplication/commit/cbe46b867c8f23bf9f078e7fe1b72247b66ac629))
+
+
 ## v1.0.0 (2023-12-21)
 
 ### Breaking
