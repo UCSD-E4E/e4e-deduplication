@@ -2,6 +2,15 @@
 
 
 
+## v1.1.1 (2023-12-21)
+
+### Fix
+
+* fix: Removes versioning from appdirs (#26) ([`cfcf8e8`](https://github.com/UCSD-E4E/e4e-deduplication/commit/cfcf8e8a3b4fa70fd5f518f92bf1866a7193b818))
+
+* fix: Removes versioning from appdirs ([`1bedc79`](https://github.com/UCSD-E4E/e4e-deduplication/commit/1bedc798cdd8e28ebee16f619d1f9587bc80f916))
+
+
 ## v1.1.0 (2023-12-21)
 
 ### Feature
