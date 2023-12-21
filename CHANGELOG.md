@@ -2,6 +2,35 @@
 
 
 
+## v1.0.0 (2023-12-21)
+
+### Breaking
+
+* feat!: Switches cli to subcommands ([`3b8ccaa`](https://github.com/UCSD-E4E/e4e-deduplication/commit/3b8ccaac6b9bff1bcbed9f1675d8f2728c3cb399))
+
+* feat!: WIP -adding subcommands ([`02340be`](https://github.com/UCSD-E4E/e4e-deduplication/commit/02340bebe25d1380cb32c38390e3c7eadddb8b3d))
+
+* feat!: Enables hostname aware comparison ([`55ea161`](https://github.com/UCSD-E4E/e4e-deduplication/commit/55ea1614c79ae13ea7641aeed9a3b6d7d6fc2a6c))
+
+### Ci
+
+* ci: Adds windows and macos for testing ([`568ce5a`](https://github.com/UCSD-E4E/e4e-deduplication/commit/568ce5a7a7aa37022f3bcfc04a55480c060f6775))
+
+### Feature
+
+* feat: allow for cross machine (#23) ([`3f6fa7b`](https://github.com/UCSD-E4E/e4e-deduplication/commit/3f6fa7b937317a668acd5bc61f38a962de0ab481))
+
+### Fix
+
+* fix: Fixes *nix permissions ([`39b6c4d`](https://github.com/UCSD-E4E/e4e-deduplication/commit/39b6c4da1bcff373ef5290baefd8e5b3cf1660f9))
+
+* fix: Adds logging, fixes cache rebuild after cache sort ([`d200e15`](https://github.com/UCSD-E4E/e4e-deduplication/commit/d200e1541edf79e561ee9a1ea5d042fcbc149f5e))
+
+### Test
+
+* test: Adds tests for os delete scripts ([`0745005`](https://github.com/UCSD-E4E/e4e-deduplication/commit/0745005d2216f9adf55d79b01a17d2f88d647ee1))
+
+
 ## v0.7.1 (2023-12-18)
 
 ### Ci
