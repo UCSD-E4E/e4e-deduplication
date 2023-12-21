@@ -43,6 +43,7 @@ class Deduplicator:
             'export_cache': self.__configure_export_cache_parser,
             # 'info': self.__configure_info_parser,
             'import_cache': self.__configure_import_cache_parser,
+            'list_jobs': self.__configure_list_jobs_parser,
         }
         self.parser = ArgumentParser()
         subparsers = self.parser.add_subparsers()
@@ -241,6 +242,13 @@ class Deduplicator:
                 return
         job_path.mkdir(parents=True, exist_ok=True)
         shutil.copy(input_file, job_path.joinpath('hashes.csv'))
+
+    def __configure_list_jobs_parser(self, parser: ArgumentParser):
+        parser.set_defaults(func=self._list_jobs)
+
+    def _list_jobs(self) -> None:
+        for path in Path(self.__app_dirs.user_data_dir).glob('*'):
+            print(path.name)
 
     def output_writer(self, spec: str) -> TextIO:
         """Creates a writer for either stdout or a file
