@@ -33,7 +33,7 @@ class Deduplicator:
             self.__app_dirs = app_dirs
         else:
             self.__app_dirs = AppDirs(
-                'e4e-deduplicator', version=self.__version.major)
+                'e4e-deduplicator')
         self.configure_loggers()
         self.__log = logging.getLogger('Deduplicator')
         commands = {
