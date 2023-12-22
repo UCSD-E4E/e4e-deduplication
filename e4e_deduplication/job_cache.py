@@ -178,6 +178,8 @@ class JobCache:
         Args:
             hostname (str, optional): Hostname to set. Defaults to the current machine.
         """
+        # pylint: disable=consider-using-with
+        # resource needs to exist beyond the scope of this function
         with TemporaryDirectory() as tmpdir:
             temp_dir = Path(tmpdir).resolve()
             self.__hash_handle.seek(0)
@@ -186,7 +188,9 @@ class JobCache:
             with open(temp_dir.joinpath('hashes.csv'), 'w', encoding='utf-8') as handle:
                 shutil.copyfileobj(self.__hash_handle, handle)
             with open(temp_dir.joinpath('hashes.csv'), 'r', encoding='utf-8') as handle:
-                self.__hash_handle.seek(0)
+                self.__hash_handle.close()
+                self.__hash_handle = open(
+                    self.__hash_path, 'w', encoding='utf-8')
                 for line in handle:
                     if line.strip() == '':
                         continue
@@ -202,3 +206,6 @@ class JobCache:
                         continue
                     self.__hash_handle.write(
                         f'{parts[0]},{parts[1]},{parts[2]}\n')
+        self.__hash_handle.close()
+        self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
+        self.__hash_handle.seek(0)
