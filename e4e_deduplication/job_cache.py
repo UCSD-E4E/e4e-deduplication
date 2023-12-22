@@ -178,6 +178,8 @@ class JobCache:
         Args:
             hostname (str, optional): Hostname to set. Defaults to the current machine.
         """
+        # pylint: disable=consider-using-with
+        # resource needs to exist beyond the scope of this function
         with TemporaryDirectory() as tmpdir:
             temp_dir = Path(tmpdir).resolve()
             self.__hash_handle.seek(0)
