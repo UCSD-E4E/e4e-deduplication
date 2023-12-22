@@ -2,6 +2,23 @@
 
 
 
+## v1.1.2 (2023-12-22)
+
+### Fix
+
+* fix: Fixes Cache upgrade (#27) ([`9b3cec3`](https://github.com/UCSD-E4E/e4e-deduplication/commit/9b3cec300bfb3bc28c467ac01b64c5b4c9705af6))
+
+* fix: Fixes cache upgrade ([`dfedf70`](https://github.com/UCSD-E4E/e4e-deduplication/commit/dfedf708a5438e49405c76850454d180fcb8a2f0))
+
+### Style
+
+* style: Fixes resource allocation ([`fa0b2fb`](https://github.com/UCSD-E4E/e4e-deduplication/commit/fa0b2fb38ea254f7a42a3f2bf3f45202f957ead8))
+
+### Test
+
+* test: Fixes upgrade cache test ([`2fb50d5`](https://github.com/UCSD-E4E/e4e-deduplication/commit/2fb50d59f0fbd74c1b0fbe2db288758ffc4c21f4))
+
+
 ## v1.1.1 (2023-12-21)
 
 ### Fix
