@@ -2,6 +2,15 @@
 
 
 
+## v1.1.3 (2023-12-27)
+
+### Fix
+
+* fix: Removes schema (#28) ([`f7b439b`](https://github.com/UCSD-E4E/e4e-deduplication/commit/f7b439b8b306137761226766b46e51d4db8f1162))
+
+* fix: Removes schema ([`9ea0b83`](https://github.com/UCSD-E4E/e4e-deduplication/commit/9ea0b833e243295d73df6ebfa873bb1032ce0271))
+
+
 ## v1.1.2 (2023-12-22)
 
 ### Fix
