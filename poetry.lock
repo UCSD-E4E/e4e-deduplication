@@ -167,17 +167,6 @@ files = [
 ]
 
 [[package]]
-name = "contextlib2"
-version = "21.6.0"
-description = "Backports and enhancements for the contextlib module"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "contextlib2-21.6.0-py2.py3-none-any.whl", hash = "sha256:3fbdb64466afd23abaf6c977627b75b6139a5a3e8ce38405c5b413aed7a0471f"},
-    {file = "contextlib2-21.6.0.tar.gz", hash = "sha256:ab1e2bfe1d01d968e1b7e8d9023bc51ef3509bba217bb730cee3827e1ee82869"},
-]
-
-[[package]]
 name = "coverage"
 version = "7.3.3"
 description = "Code coverage measurement for Python"
@@ -591,20 +580,6 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)"]
 use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
-name = "schema"
-version = "0.7.5"
-description = "Simple data validation library"
-optional = false
-python-versions = "*"
-files = [
-    {file = "schema-0.7.5-py2.py3-none-any.whl", hash = "sha256:f3ffdeeada09ec34bf40d7d79996d9f7175db93b7a5065de0faa7f41083c1e6c"},
-    {file = "schema-0.7.5.tar.gz", hash = "sha256:f06717112c61895cabc4707752b88716e8420a8819d71404501e114f91043197"},
-]
-
-[package.dependencies]
-contextlib2 = ">=0.5.5"
-
-[[package]]
 name = "semantic-version"
 version = "2.10.0"
 description = "A library implementing the 'SemVer' scheme."
@@ -802,4 +777,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "0801dd30d34ff5a2b2dc06351139cf66242c3fd9de1eed07ccf2c50dd3994a5c"
+content-hash = "aa9ee9cd5c3a9f456047b2d1d34490c712a3eced3f3849d6721de80557d0be87"
