@@ -11,6 +11,7 @@
             "module": "e4e_deduplication",
             "justMyCode": true,
             "args": [
+                "analyze",
                 "-d",
                 ".venv",
                 "-j",
@@ -20,7 +21,6 @@
                 "dedup_ignore.txt",
                 "-a",
                 "analyze.rpt",
-                "analyze"
             ]
         },
         {
@@ -30,14 +30,15 @@
             "module": "e4e_deduplication",
             "justMyCode": true,
             "args": [
+                "delete",
                 "-d",
                 ".venv/Scripts",
                 "-j",
                 "test",
                 "-e",
                 "dedup_ignore.txt",
-                "--dry_run",
-                "delete"
+                "-s",
+                "delete.txt"
             ]
         }
     ]

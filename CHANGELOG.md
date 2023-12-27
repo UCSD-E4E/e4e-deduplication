@@ -2,6 +2,68 @@
 
 
 
+## v1.1.2 (2023-12-22)
+
+### Fix
+
+* fix: Fixes Cache upgrade (#27) ([`9b3cec3`](https://github.com/UCSD-E4E/e4e-deduplication/commit/9b3cec300bfb3bc28c467ac01b64c5b4c9705af6))
+
+* fix: Fixes cache upgrade ([`dfedf70`](https://github.com/UCSD-E4E/e4e-deduplication/commit/dfedf708a5438e49405c76850454d180fcb8a2f0))
+
+### Style
+
+* style: Fixes resource allocation ([`fa0b2fb`](https://github.com/UCSD-E4E/e4e-deduplication/commit/fa0b2fb38ea254f7a42a3f2bf3f45202f957ead8))
+
+### Test
+
+* test: Fixes upgrade cache test ([`2fb50d5`](https://github.com/UCSD-E4E/e4e-deduplication/commit/2fb50d59f0fbd74c1b0fbe2db288758ffc4c21f4))
+
+
+## v1.1.1 (2023-12-21)
+
+### Fix
+
+* fix: Removes versioning from appdirs (#26) ([`cfcf8e8`](https://github.com/UCSD-E4E/e4e-deduplication/commit/cfcf8e8a3b4fa70fd5f518f92bf1866a7193b818))
+
+* fix: Removes versioning from appdirs ([`1bedc79`](https://github.com/UCSD-E4E/e4e-deduplication/commit/1bedc798cdd8e28ebee16f619d1f9587bc80f916))
+
+
+## v1.1.0 (2023-12-21)
+
+### Feature
+
+* feat: Adds list jobs ([`cbe46b8`](https://github.com/UCSD-E4E/e4e-deduplication/commit/cbe46b867c8f23bf9f078e7fe1b72247b66ac629))
+
+
+## v1.0.0 (2023-12-21)
+
+### Breaking
+
+* feat!: Switches cli to subcommands ([`3b8ccaa`](https://github.com/UCSD-E4E/e4e-deduplication/commit/3b8ccaac6b9bff1bcbed9f1675d8f2728c3cb399))
+
+* feat!: WIP -adding subcommands ([`02340be`](https://github.com/UCSD-E4E/e4e-deduplication/commit/02340bebe25d1380cb32c38390e3c7eadddb8b3d))
+
+* feat!: Enables hostname aware comparison ([`55ea161`](https://github.com/UCSD-E4E/e4e-deduplication/commit/55ea1614c79ae13ea7641aeed9a3b6d7d6fc2a6c))
+
+### Ci
+
+* ci: Adds windows and macos for testing ([`568ce5a`](https://github.com/UCSD-E4E/e4e-deduplication/commit/568ce5a7a7aa37022f3bcfc04a55480c060f6775))
+
+### Feature
+
+* feat: allow for cross machine (#23) ([`3f6fa7b`](https://github.com/UCSD-E4E/e4e-deduplication/commit/3f6fa7b937317a668acd5bc61f38a962de0ab481))
+
+### Fix
+
+* fix: Fixes *nix permissions ([`39b6c4d`](https://github.com/UCSD-E4E/e4e-deduplication/commit/39b6c4da1bcff373ef5290baefd8e5b3cf1660f9))
+
+* fix: Adds logging, fixes cache rebuild after cache sort ([`d200e15`](https://github.com/UCSD-E4E/e4e-deduplication/commit/d200e1541edf79e561ee9a1ea5d042fcbc149f5e))
+
+### Test
+
+* test: Adds tests for os delete scripts ([`0745005`](https://github.com/UCSD-E4E/e4e-deduplication/commit/0745005d2216f9adf55d79b01a17d2f88d647ee1))
+
+
 ## v0.7.1 (2023-12-18)
 
 ### Ci

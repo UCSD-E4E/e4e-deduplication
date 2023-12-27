@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "e4e-deduplication"
-version = "0.7.1"
+version = "1.1.2"
 description = ""
 authors = ["Nathan Hui <nthui@ucsd.edu>"]
 readme = "README.md"
@@ -10,6 +10,7 @@ packages = [{include = "e4e_deduplication"}]
 python = "^3.9"
 appdirs = "^1.4.4"
 tqdm = "^4.66.1"
+semantic-version = "^2.10.0"
 
 [tool.poetry.group.dev.dependencies]
 pylint = "^2.16.2"
@@ -25,7 +26,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-e4e_deduplication = "e4e_deduplication.__main__:main"
+e4e_deduplication = "e4e_deduplication.app:main"
 
 
 [tool.semantic_release]

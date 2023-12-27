@@ -6,7 +6,7 @@ from pathlib import Path
 from queue import Empty, Queue
 from threading import Thread
 from typing import Callable, Iterable
-
+import logging
 from tqdm import tqdm
 
 from e4e_deduplication.hasher import compute_sha256
@@ -60,6 +60,7 @@ class ParallelHasher:
         self._pb_lock = Lock()
         self._hash_fn = hash_fn
         self._n_bytes = n_bytes
+        self.__log = logging.getLogger('ParallelHasher')
 
     def run(self, paths: Iterable[Path], n_iter: int):
         """Runs the parallel hasher
@@ -68,6 +69,7 @@ class ParallelHasher:
             paths (Iterable[Path]): Iterable of paths to hash
             n_iter (int): Number of iterations expected
         """
+        n_files_discovered = 0
         processor_terminate = Event()
         result_condition = Condition()
         job_terminate = Event()
@@ -118,6 +120,7 @@ class ParallelHasher:
             with job_condition:
                 job_queue.put(path)
                 job_condition.notify()
+            n_files_discovered += 1
         job_terminate.set()
         with job_condition:
             job_condition.notify_all()
@@ -129,6 +132,7 @@ class ParallelHasher:
             result_condition.notify_all()
         accumulator.join()
         self._pb.close()
+        self.__log.info(f'Processed {n_files_discovered} real files')
 
     def _result_accumulator(self,
                             result_condition: Condition,
