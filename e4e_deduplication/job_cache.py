@@ -218,6 +218,8 @@ class JobCache:
             host (str): Host to drop from
             directory (Path): Path to drop from
         """
+        # pylint: disable=consider-using-with
+        # resource needs to exist beyond the scope of this function
         # Need to modify the CSV
         with TemporaryDirectory() as tmpdir:
             temp_dir = Path(tmpdir).resolve()
