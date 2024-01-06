@@ -127,5 +127,33 @@ def test_drop_tree():
                 assert f'c_{idx:06d}' not in job_cache
 
 
+def test_comma_filepaths():
+    with TemporaryDirectory() as tmpdir:
+        temp_dir = Path(tmpdir).resolve()
+        job_cache_path = temp_dir.joinpath('hashes.csv')
+
+        with JobCache(job_cache_path) as job_cache:
+            for idx in range(5):
+                job_cache.add(temp_dir.joinpath('files', 'tree',
+                              f'{idx:06d},{idx}.bin'), f'c_{idx:06d}')
+            for idx in range(5):
+                job_cache.add(temp_dir.joinpath(
+                    'files', f'{idx:06d},{idx}.bin'), f'{idx:06d}')
+
+        with JobCache(job_cache_path) as job_cache:
+            job_cache.set_unknown_hostnames('asdf')
+
+        with JobCache(job_cache_path) as job_cache:
+            job_cache.drop_tree(
+                host=socket.gethostname(),
+                directory=temp_dir.joinpath('files', 'tree')
+            )
+
+        with JobCache(job_cache_path) as job_cache:
+            for idx in range(1024):
+                assert f'{idx:06d}' in job_cache
+                assert f'c_{idx:06d}' not in job_cache
+
+
 if __name__ == '__main__':
     test_loading()
