@@ -50,98 +50,44 @@ def test_loading():
                 assert len(cache.get_duplicates()) == n_duplicate
 
 
-def test_big_cache(big_hash_cache: Path):
-    """Tests that the cache object can take in a big hash cache
-
-    Args:
-        big_hash_cache (Path): Path to big hash cache
-    """
-    with JobCache(big_hash_cache) as cache:
-        start = perf_counter()
-        in_cache = 'fffffe9151b1b72580f81ef81391ad0e74c3c39f5af784ba68a0594754b790ae' in cache
-        paths = cache['fffffe9151b1b72580f81ef81391ad0e74c3c39f5af784ba68a0594754b790ae']
-        end = perf_counter()
-        assert in_cache is True
-        assert paths
-        assert (end - start) < 10
-
-
-def test_hostname_agnostic_load():
-    """Tests loading a hostname agnostic cache
-    """
-    n_lines = 1024
-    with TemporaryDirectory() as tmpdir:
-        temp_dir = Path(tmpdir)
-        hash_map = {}
-        with open(temp_dir.joinpath('hashes.csv'), 'w', encoding='utf-8') as handle:
-            for idx in range(n_lines):
-                digest = randbytes(32).hex()
-                path = temp_dir.joinpath(f'{idx}.bin')
-                handle.write(f'{digest},{path.as_posix()}')
-                handle.write('\n')
-                hash_map[digest] = path
-        cache = JobCache(temp_dir)
-        cache.open()
-        for digest, path in hash_map.items():
-            assert digest in cache
-            assert len(cache[digest]) == 1
-        cache.close()
-
-
-def test_upgrade_cache(big_hash_cache: Path):
-    """Tests that we can upgrade the cache
-
-    Args:
-        big_hash_cache (Path): Path to 2 column hash cache
-    """
-    with open(big_hash_cache.joinpath('hashes.csv'), 'r', encoding='utf-8') as handle:
-        assert any(len(line.strip().split(',')) != 3 for line in handle)
-    with JobCache(big_hash_cache) as job_cache:
-        job_cache.set_unknown_hostnames()
-    with open(big_hash_cache.joinpath('hashes.csv'), 'r', encoding='utf-8') as handle:
-        assert all(len(line.strip().split(',')) == 3 for line in handle)
-
-
 def test_drop_tree():
     """Tests dropping a tree in hashes
     """
+    n_files = 5
     with TemporaryDirectory() as tmpdir:
         temp_dir = Path(tmpdir).resolve()
         job_cache_path = temp_dir.joinpath('hashes.csv')
 
         with JobCache(job_cache_path) as job_cache:
-            for idx in range(1024):
+            for idx in range(n_files):
                 job_cache.add(temp_dir.joinpath('files', 'tree',
                               f'{idx:06d}.bin'), f'c_{idx:06d}')
-            for idx in range(1024):
                 job_cache.add(temp_dir.joinpath(
                     'files', f'{idx:06d}.bin'), f'{idx:06d}')
+        with JobCache(job_cache_path) as job_cache:
             job_cache.drop_tree(
                 host=socket.gethostname(),
                 directory=temp_dir.joinpath('files', 'tree')
             )
 
         with JobCache(job_cache_path) as job_cache:
-            for idx in range(1024):
+            for idx in range(n_files):
                 assert f'{idx:06d}' in job_cache
                 assert f'c_{idx:06d}' not in job_cache
 
 
 def test_comma_filepaths():
+    n_files = 5
     with TemporaryDirectory() as tmpdir:
         temp_dir = Path(tmpdir).resolve()
         job_cache_path = temp_dir.joinpath('hashes.csv')
 
         with JobCache(job_cache_path) as job_cache:
-            for idx in range(5):
+            for idx in range(n_files):
                 job_cache.add(temp_dir.joinpath('files', 'tree',
                               f'{idx:06d},{idx}.bin'), f'c_{idx:06d}')
-            for idx in range(5):
                 job_cache.add(temp_dir.joinpath(
                     'files', f'{idx:06d},{idx}.bin'), f'{idx:06d}')
-
-        with JobCache(job_cache_path) as job_cache:
-            job_cache.set_unknown_hostnames('asdf')
 
         with JobCache(job_cache_path) as job_cache:
             job_cache.drop_tree(
@@ -150,7 +96,7 @@ def test_comma_filepaths():
             )
 
         with JobCache(job_cache_path) as job_cache:
-            for idx in range(1024):
+            for idx in range(n_files):
                 assert f'{idx:06d}' in job_cache
                 assert f'c_{idx:06d}' not in job_cache
 

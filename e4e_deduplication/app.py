@@ -40,7 +40,6 @@ class Deduplicator:
         commands = {
             'analyze': self.__configure_analyze_parser,
             'delete': self.__configure_delete_parser,
-            'upgrade_cache': self.__configure_upgrade_cache_parser,
             'export_cache': self.__configure_export_cache_parser,
             # 'info': self.__configure_info_parser,
             'import_cache': self.__configure_import_cache_parser,
@@ -215,19 +214,6 @@ class Deduplicator:
                     path=str(file), digest=digest) + '\n')
 
         script_dest.chmod(0o766)
-
-    def __configure_upgrade_cache_parser(self, parser: ArgumentParser):
-        parser.add_argument('-j', '--job_name',
-                            help='name of job cache to use',
-                            type=str,
-                            required=True)
-        parser.set_defaults(func=self._upgrade_cache)
-
-    def _upgrade_cache(self, job_name: str) -> None:
-        job_path = Path(self.__app_dirs.user_data_dir, job_name).resolve()
-        self.__log.info(f'Using job path {job_path}')
-        with JobCache(job_path) as cache:
-            cache.set_unknown_hostnames()
 
     def __configure_export_cache_parser(self, parser: ArgumentParser):
         parser.add_argument('-j', '--job_name',
