@@ -2,6 +2,13 @@
 
 
 
+## v1.3.1 (2024-01-06)
+
+### Fix
+
+* fix: Adds cache execution logic ([`5625628`](https://github.com/UCSD-E4E/e4e-deduplication/commit/562562833889c0bb70970af03d36bc287d7b5a80))
+
+
 ## v1.3.0 (2024-01-06)
 
 ### Chore
