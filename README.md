@@ -53,13 +53,6 @@ options:
                         Delete script destination
   --shell {cmd,ps,sh}   Shell to generate script for
 
-usage: e4e_deduplication upgrade_cache [-h] -j JOB_NAME
-
-options:
-  -h, --help            show this help message and exit
-  -j JOB_NAME, --job_name JOB_NAME
-                        name of job cache to use
-
 usage: e4e_deduplication export_cache [-h] -j JOB_NAME -o OUTPUT
 
 options:

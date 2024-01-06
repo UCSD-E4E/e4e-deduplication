@@ -2,6 +2,8 @@
 '''
 from __future__ import annotations
 
+import json
+import logging
 import os
 import shutil
 import socket
@@ -9,7 +11,7 @@ from io import FileIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Dict, List, Set, Tuple
-import logging
+
 from tqdm import tqdm
 
 from e4e_deduplication.file_sort import sort_file
@@ -59,12 +61,13 @@ class JobCache:
                    unit_scale=True)
         self.__sorted = True
         while line := self.__hash_handle.readline():
-            digest = line.split(',')[0]
+            document: Dict = json.loads(line)
+            digest = document['digest']
             if digest in self.__hash_cache:
                 self.__hash_cache[digest].append(
-                    prev_line_idx + len(digest) + 1)
+                    prev_line_idx)
             else:
-                self.__hash_cache[digest] = [prev_line_idx + len(digest) + 1]
+                self.__hash_cache[digest] = [prev_line_idx]
             prev_line_idx = self.__hash_handle.tell()
             pb_.update(len(line) + 1)
             self.__n_lines += 1
@@ -100,14 +103,17 @@ class JobCache:
         """
         self.__hash_handle.seek(0, os.SEEK_END)
         line_start = self.__hash_handle.tell()
-        self.__hash_handle.writelines(
-            [f'{digest},{path.as_posix()},{self.__current_hostname}'])
-        self.__hash_handle.write('\n')
+        document = json.dumps({
+            'digest': digest,
+            'path': path.as_posix(),
+            'host': self.__current_hostname
+        })
+        self.__hash_handle.write(document + '\n')
         self.__hash_handle.seek(0)
         if digest in self.__hash_cache:
-            self.__hash_cache[digest].append(line_start + len(digest) + 1)
+            self.__hash_cache[digest].append(line_start)
         else:
-            self.__hash_cache[digest] = [line_start + len(digest) + 1]
+            self.__hash_cache[digest] = [line_start]
         self.__n_lines += 1
         self.__sorted = False
 
@@ -153,12 +159,8 @@ class JobCache:
     def __extract_path_hostname(self, offset: int) -> Tuple[Path, str]:
         self.__hash_handle.seek(offset)
         line = self.__hash_handle.readline().strip()
-        path = Path(line.split(',')[0])
-        try:
-            hostname = line.split(',')[1]
-        except IndexError:
-            hostname = ''
-        return path, hostname
+        document: Dict = json.loads(line)
+        return Path(document['path']), document['host']
 
     def clear(self) -> None:
         """Clears the job cache
@@ -171,45 +173,6 @@ class JobCache:
         self.__hash_handle.seek(0)
         self.__hash_cache.clear()
         self.__n_lines = 0
-
-    def set_unknown_hostnames(self, hostname: str = None) -> None:
-        """Sets the unknown hostnames
-
-        Args:
-            hostname (str, optional): Hostname to set. Defaults to the current machine.
-        """
-        # pylint: disable=consider-using-with
-        # resource needs to exist beyond the scope of this function
-        with TemporaryDirectory() as tmpdir:
-            temp_dir = Path(tmpdir).resolve()
-            self.__hash_handle.seek(0)
-            if not hostname:
-                hostname = self.__current_hostname
-            with open(temp_dir.joinpath('hashes.csv'), 'w', encoding='utf-8') as handle:
-                shutil.copyfileobj(self.__hash_handle, handle)
-            with open(temp_dir.joinpath('hashes.csv'), 'r', encoding='utf-8') as handle:
-                self.__hash_handle.close()
-                self.__hash_handle = open(
-                    self.__hash_path, 'w', encoding='utf-8')
-                for line in handle:
-                    if line.strip() == '':
-                        continue
-                    parts = line.strip().split(',')
-                    if len(parts) < 2:
-                        self.__log.error(f'line {line} is invalid!')
-                        continue
-                    if len(parts) < 3:
-                        parts.append(hostname)
-                    if len(parts) != 3:
-                        self.__log.critical(
-                            f'Set Unknown Hostname logic failure! {line}')
-                        continue
-                    self.__hash_handle.write(
-                        f'{parts[0]},{parts[1]},{parts[2]}\n')
-        self.__hash_handle.close()
-        self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
-        self.__hash_handle.seek(0)
-        self.__rebuild_cache()
 
     def drop_tree(self, host: str, directory: Path):
         """Drops any paths that match the specified host/directory
@@ -233,9 +196,9 @@ class JobCache:
                 for line in handle:
                     if line.strip() == '':
                         continue
-                    parts = line.strip().split(',')
-                    line_host = parts[2]
-                    line_path = Path(parts[1])
+                    document = json.loads(line)
+                    line_host = document['host']
+                    line_path = Path(document['path'])
                     if line_host != host:
                         self.__hash_handle.write(line)
                         continue
