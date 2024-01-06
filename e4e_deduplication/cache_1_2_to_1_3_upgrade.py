@@ -51,3 +51,7 @@ def main():
                         required=True)
     args = parser.parse_args()
     upgrade_cache(**vars(args))
+
+
+if __name__ == '__main__':
+    main()
