@@ -209,3 +209,38 @@ class JobCache:
         self.__hash_handle.close()
         self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
         self.__hash_handle.seek(0)
+        self.__rebuild_cache()
+
+    def drop_tree(self, host: str, directory: Path):
+        """Drops any paths that match the specified host/directory
+
+        Args:
+            host (str): Host to drop from
+            directory (Path): Path to drop from
+        """
+        # Need to modify the CSV
+        with TemporaryDirectory() as tmpdir:
+            temp_dir = Path(tmpdir).resolve()
+            self.__hash_handle.seek(0)
+            with open(temp_dir.joinpath('hashes.csv'), 'w', encoding='utf-8') as handle:
+                shutil.copyfileobj(self.__hash_handle, handle)
+            with open(temp_dir.joinpath('hashes.csv'), 'r', encoding='utf-8') as handle:
+                self.__hash_handle.close()
+                self.__hash_handle = open(
+                    self.__hash_path, 'w', encoding='utf-8')
+                for line in handle:
+                    if line.strip() == '':
+                        continue
+                    parts = line.strip().split(',')
+                    line_host = parts[2]
+                    line_path = Path(parts[1])
+                    if line_host != host:
+                        self.__hash_handle.write(line)
+                        continue
+                    if directory not in line_path.parents:
+                        self.__hash_handle.write(line)
+                        continue
+        self.__hash_handle.close()
+        self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
+        self.__hash_handle.seek(0)
+        self.__rebuild_cache()
