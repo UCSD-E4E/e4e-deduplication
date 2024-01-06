@@ -77,6 +77,8 @@ def test_drop_tree():
 
 
 def test_comma_filepaths():
+    """Tests commas in filepaths
+    """
     n_files = 5
     with TemporaryDirectory() as tmpdir:
         temp_dir = Path(tmpdir).resolve()
