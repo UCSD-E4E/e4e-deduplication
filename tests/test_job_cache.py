@@ -3,9 +3,7 @@
 import socket
 from hashlib import sha256
 from pathlib import Path
-from random import randbytes
 from tempfile import TemporaryDirectory
-from time import perf_counter
 
 from tqdm import tqdm
 
