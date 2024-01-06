@@ -2,6 +2,19 @@
 
 
 
+## v1.2.0 (2024-01-06)
+
+### Feature
+
+* feat: Adds a drop tree command (#29) ([`62215fe`](https://github.com/UCSD-E4E/e4e-deduplication/commit/62215fe9eefc9e809bb1a7ff52f7fbde8a88c758))
+
+* feat: Adds a drop tree command ([`a91013e`](https://github.com/UCSD-E4E/e4e-deduplication/commit/a91013e8789d2b47cccde507dc250a5de32f50a2))
+
+### Style
+
+* style: Fixes reopen warning ([`df84d7e`](https://github.com/UCSD-E4E/e4e-deduplication/commit/df84d7e8b17867a473aea77be08704dee64534b4))
+
+
 ## v1.1.3 (2023-12-27)
 
 ### Fix
