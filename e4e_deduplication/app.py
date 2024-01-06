@@ -7,12 +7,13 @@ import logging
 import logging.handlers
 import os
 import shutil
+import socket
 import sys
 import time
 from argparse import ArgumentParser
 from importlib import metadata
 from pathlib import Path
-from typing import TextIO, Any
+from typing import Any, TextIO
 
 import semantic_version
 from appdirs import AppDirs
@@ -44,6 +45,7 @@ class Deduplicator:
             # 'info': self.__configure_info_parser,
             'import_cache': self.__configure_import_cache_parser,
             'list_jobs': self.__configure_list_jobs_parser,
+            'drop_tree': self.__configure_drop_tree_parser,
         }
         self.parser = ArgumentParser()
         subparsers = self.parser.add_subparsers()
@@ -54,6 +56,29 @@ class Deduplicator:
 
         self.parser.add_argument(
             '--version', action='version', version=str(self.__version))
+
+    def __configure_drop_tree_parser(self, parser: ArgumentParser):
+        parser.add_argument('-j', '--job_name',
+                            type=str,
+                            required=True,
+                            help='Name of job cache to use.')
+        parser.add_argument('--host',
+                            help='Host of directory to drop from',
+                            type=str,
+                            required=False,
+                            default=socket.gethostname())
+        parser.add_argument('-d', '--directory',
+                            help='The path to drop',
+                            type=Path,
+                            required=True)
+        parser.set_defaults(func=self._drop_tree)
+
+    def _drop_tree(self, job_name: str, host: str, directory: Path):
+        self.__log.info(f'Dropping {host}:{directory} from {job_name}')
+        job_path = Path(self.__app_dirs.user_data_dir, job_name).resolve()
+
+        with JobCache(job_path) as job:
+            job.drop_tree(host, directory)
 
     def __configure_analyze_parser(self, parser: ArgumentParser):
         parser.add_argument('-d', '--directory',

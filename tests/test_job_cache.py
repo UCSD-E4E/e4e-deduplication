@@ -1,10 +1,11 @@
 '''Testing Job Cache
 '''
+import socket
 from hashlib import sha256
 from pathlib import Path
+from random import randbytes
 from tempfile import TemporaryDirectory
 from time import perf_counter
-from random import randbytes
 
 from tqdm import tqdm
 
@@ -99,6 +100,31 @@ def test_upgrade_cache(big_hash_cache: Path):
         job_cache.set_unknown_hostnames()
     with open(big_hash_cache.joinpath('hashes.csv'), 'r', encoding='utf-8') as handle:
         assert all(len(line.strip().split(',')) == 3 for line in handle)
+
+
+def test_drop_tree():
+    """Tests dropping a tree in hashes
+    """
+    with TemporaryDirectory() as tmpdir:
+        temp_dir = Path(tmpdir).resolve()
+        job_cache_path = temp_dir.joinpath('hashes.csv')
+
+        with JobCache(job_cache_path) as job_cache:
+            for idx in range(1024):
+                job_cache.add(temp_dir.joinpath('files', 'tree',
+                              f'{idx:06d}.bin'), f'c_{idx:06d}')
+            for idx in range(1024):
+                job_cache.add(temp_dir.joinpath(
+                    'files', f'{idx:06d}.bin'), f'{idx:06d}')
+            job_cache.drop_tree(
+                host=socket.gethostname(),
+                directory=temp_dir.joinpath('files', 'tree')
+            )
+
+        with JobCache(job_cache_path) as job_cache:
+            for idx in range(1024):
+                assert f'{idx:06d}' in job_cache
+                assert f'c_{idx:06d}' not in job_cache
 
 
 if __name__ == '__main__':
