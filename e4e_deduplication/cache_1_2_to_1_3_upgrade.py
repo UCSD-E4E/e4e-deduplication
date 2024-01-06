@@ -18,7 +18,7 @@ def upgrade_cache(
     """
     with TemporaryDirectory() as tmpdir:
         temp_dir = Path(tmpdir)
-        copy_file = temp_dir / 'hashes.csv'
+        copy_file = temp_dir / 'v1.2_hashes.csv'
         shutil.copy(hash_file, copy_file)
         with open(dest_path, 'w', encoding='utf-8') as out_handle, \
                 open(copy_file, 'r', encoding='utf-8') as in_handle:
@@ -43,11 +43,11 @@ def main():
     )
     parser.add_argument('--hash_file',
                         type=Path,
-                        help='Hash file to upgrade',
+                        help='v1.2.0 hash file to upgrade',
                         required=True)
     parser.add_argument('--dest_path',
                         type=Path,
-                        help='Path to write upgraded cache to',
+                        help='Path to write upgraded v1.3.0 cache to',
                         required=True)
     args = parser.parse_args()
     upgrade_cache(**vars(args))
