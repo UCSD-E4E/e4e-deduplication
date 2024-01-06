@@ -2,6 +2,29 @@
 
 
 
+## v1.3.0 (2024-01-06)
+
+### Chore
+
+* chore: Merges 31 bug file path may contain commas (#32) ([`ca3ed0d`](https://github.com/UCSD-E4E/e4e-deduplication/commit/ca3ed0d92fdafba4a74c385fd18be90bb2f88f00))
+
+### Ci
+
+* ci: Adds test for #31 ([`ada7fcb`](https://github.com/UCSD-E4E/e4e-deduplication/commit/ada7fcb0e6c6e8357d035c069f22e8c17b4ed199))
+
+### Feature
+
+* feat: Switches to json based cache, splits cache upgrade scripts ([`14f6f32`](https://github.com/UCSD-E4E/e4e-deduplication/commit/14f6f32660d4391400772da3fdfea3eb0301248d))
+
+### Style
+
+* style: Fixes duplicate code ([`c3082e8`](https://github.com/UCSD-E4E/e4e-deduplication/commit/c3082e873adc0911476586f2e308c4546f010243))
+
+* style: Removes unused imports ([`c8275f7`](https://github.com/UCSD-E4E/e4e-deduplication/commit/c8275f7197b397a8e231e468898f1580d1074d54))
+
+* style: Adds docstrings ([`ac087e4`](https://github.com/UCSD-E4E/e4e-deduplication/commit/ac087e4a3586567d2c0d5a62f1b5d86fa798fd78))
+
+
 ## v1.2.0 (2024-01-06)
 
 ### Feature
