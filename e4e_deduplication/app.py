@@ -45,6 +45,7 @@ class Deduplicator:
             'import_cache': self.__configure_import_cache_parser,
             'list_jobs': self.__configure_list_jobs_parser,
             'drop_tree': self.__configure_drop_tree_parser,
+            'report': self.__configure_report_parser
         }
         self.parser = ArgumentParser()
         subparsers = self.parser.add_subparsers()
@@ -55,6 +56,26 @@ class Deduplicator:
 
         self.parser.add_argument(
             '--version', action='version', version=str(self.__version))
+
+    def __configure_report_parser(self, parser: ArgumentParser):
+        parser.add_argument('-j', '--job_name',
+                            type=str,
+                            required=True,
+                            help='Name of job to generate report for')
+        parser.add_argument('-a', '--analysis_dest',
+                            type=str,
+                            default='',
+                            help='Analysis destination. Defaults to stdout (use "" for stdout)')
+        parser.set_defaults(func=self._report)
+
+    def _report(self,
+                job_name: str,
+                analysis_dest: str):
+        job_path = Path(self.__app_dirs.user_data_dir, job_name).resolve()
+        self.__log.info(f'Generating report for job at {job_path}')
+
+        self.__generate_report(analysis_dest=analysis_dest,
+                               job_path=job_path, ignore_pattern=None)
 
     def __configure_drop_tree_parser(self, parser: ArgumentParser):
         parser.add_argument('-j', '--job_name',
@@ -135,6 +156,9 @@ class Deduplicator:
                     app.clear_cache()
                 app.analyze(working_dir=directory_path)
 
+        self.__generate_report(analysis_dest, job_path, ignore_pattern)
+
+    def __generate_report(self, analysis_dest, job_path, ignore_pattern):
         with self.output_writer(analysis_dest) as handle, \
                 Analyzer(ignore_pattern=ignore_pattern, job_path=job_path) as app:
             analysis_report = app.get_duplicates()
