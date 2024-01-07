@@ -2,6 +2,13 @@
 
 
 
+## v1.3.2 (2024-01-07)
+
+### Fix
+
+* fix: Allows multiple directory for analyze ([`dd42401`](https://github.com/UCSD-E4E/e4e-deduplication/commit/dd424015ded73f68c374050561c7cd1eab12e294))
+
+
 ## v1.3.1 (2024-01-06)
 
 ### Fix
