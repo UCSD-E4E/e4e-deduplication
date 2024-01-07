@@ -40,7 +40,8 @@ def test_same_dir_dedup(test_analyzer: Analyzer):
             dupe_file = dupe_dir.joinpath(f'dupe_{idx:06d}.bin')
             shutil.copy(file_to_duplicate, dupe_file)
 
-        results = test_analyzer.analyze(working_dir)
+        test_analyzer.analyze(working_dir)
+        results = test_analyzer.get_duplicates()
         total_files = len(list(working_dir.rglob('*')))
         logger.debug(f'{total_files} total direntries')
         for _, file_set in results.items():
@@ -87,7 +88,8 @@ def test_separate_dir_dedup(test_analyzer: Analyzer):
             shutil.copy(file_to_duplicate, dupe_file)
 
         test_analyzer.analyze(working_dir)
-        results = test_analyzer.analyze(dupe_dir)
+        test_analyzer.analyze(dupe_dir)
+        results = test_analyzer.get_duplicates()
         assert sum(len(paths) - 1 for paths in results.values()) == n_dupes
 
         total_files = len(list(dupe_dir.rglob('*')))

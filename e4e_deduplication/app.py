@@ -133,9 +133,11 @@ class Deduplicator:
             with Analyzer(ignore_pattern=ignore_pattern, job_path=job_path) as app:
                 if clear_cache:
                     app.clear_cache()
-                analysis_report = app.analyze(working_dir=directory_path)
+                app.analyze(working_dir=directory_path)
 
-        with self.output_writer(analysis_dest) as handle:
+        with self.output_writer(analysis_dest) as handle, \
+                Analyzer(ignore_pattern=ignore_pattern, job_path=job_path) as app:
+            analysis_report = app.get_duplicates()
             for digest, files in sorted(analysis_report.items(),
                                         key=lambda x: len(x[1]),
                                         reverse=True):

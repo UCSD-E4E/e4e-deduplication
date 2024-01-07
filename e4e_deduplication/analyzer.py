@@ -27,15 +27,12 @@ class Analyzer:
         self.logger = logging.getLogger('Analyzer')
         self.__current_hostname = socket.gethostname()
 
-    def analyze(self, working_dir: Path) -> Dict[str, Set[Tuple[Path, str]]]:
+    def analyze(self, working_dir: Path):
         """Analyzes the working directory for duplicated files.  Also updates the job cache with
         every file encountered.
 
         Args:
             working_dir (Path): Directory to process
-
-        Returns:
-            Dict[str, Set[Path]]: Dictionary of digests and corresponding duplicated paths
         """
         n_files = 0
         n_bytes = 0
@@ -54,6 +51,13 @@ class Analyzer:
             hash_fn=compute_sha256,
             n_bytes=n_bytes)
         hasher.run(working_dir.rglob('*'), n_files)
+
+    def get_duplicates(self) -> Dict[str, Set[Tuple[Path, str]]]:
+        """Return the report of duplicated files
+
+        Returns:
+            Dict[str, Set[Tuple[Path, str]]]: Dict of digests and corresponding duplicated paths
+        """
         return self.__cache.get_duplicates()
 
     def delete(self, working_dir: Path) -> Dict[Path, str]:
