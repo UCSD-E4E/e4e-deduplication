@@ -2,6 +2,13 @@
 
 
 
+## v1.3.3 (2024-01-07)
+
+### Fix
+
+* fix: Fixes analyze cli linkage ([`a1f2fc3`](https://github.com/UCSD-E4E/e4e-deduplication/commit/a1f2fc37231422e5470f4c1567bf39318da3b026))
+
+
 ## v1.3.2 (2024-01-07)
 
 ### Fix
