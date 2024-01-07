@@ -84,7 +84,8 @@ class Deduplicator:
                             help='The directory to work on',
                             type=Path,
                             action='append',
-                            required=True)
+                            required=True,
+                            dest='directories')
         parser.add_argument('-e', '--exclude',
                             help='Path to ignore file of absolute path regex patterns to exclude.',
                             type=Path,
