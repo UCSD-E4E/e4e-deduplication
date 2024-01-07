@@ -13,7 +13,7 @@ import time
 from argparse import ArgumentParser
 from importlib import metadata
 from pathlib import Path
-from typing import Any, TextIO
+from typing import Any, List, TextIO
 
 import semantic_version
 from appdirs import AppDirs
@@ -83,6 +83,7 @@ class Deduplicator:
         parser.add_argument('-d', '--directory',
                             help='The directory to work on',
                             type=Path,
+                            action='append',
                             required=True)
         parser.add_argument('-e', '--exclude',
                             help='Path to ignore file of absolute path regex patterns to exclude.',
@@ -102,7 +103,7 @@ class Deduplicator:
         parser.set_defaults(func=self._analyze)
 
     def _analyze(self,
-                 directory: Path,
+                 directories: List[Path],
                  exclude: Path,
                  job_name: str,
                  clear_cache: bool,
@@ -112,25 +113,26 @@ class Deduplicator:
         job_path = Path(self.__app_dirs.user_data_dir, job_name).resolve()
         self.__log.info(f'Using job path {job_path}')
 
-        directory_path = directory.resolve()
-        self.__log.info(f'Walking path {directory_path}')
+        for directory in directories:
+            directory_path = directory.resolve()
+            self.__log.info(f'Walking path {directory_path}')
 
-        if clear_cache:
-            user_input = input(
-                'Clearing the cache is a destructive operation, proceed? [y/N]: ')
-            if user_input.lower().strip() != 'y':
-                return
-
-        if exclude:
-            ignore_pattern = load_ignore_pattern(exclude.resolve())
-        else:
-            ignore_pattern = None
-        self.__log.info(f'Using ignore pattern {ignore_pattern}')
-
-        with Analyzer(ignore_pattern=ignore_pattern, job_path=job_path) as app:
             if clear_cache:
-                app.clear_cache()
-            analysis_report = app.analyze(working_dir=directory_path)
+                user_input = input(
+                    'Clearing the cache is a destructive operation, proceed? [y/N]: ')
+                if user_input.lower().strip() != 'y':
+                    return
+
+            if exclude:
+                ignore_pattern = load_ignore_pattern(exclude.resolve())
+            else:
+                ignore_pattern = None
+            self.__log.info(f'Using ignore pattern {ignore_pattern}')
+
+            with Analyzer(ignore_pattern=ignore_pattern, job_path=job_path) as app:
+                if clear_cache:
+                    app.clear_cache()
+                analysis_report = app.analyze(working_dir=directory_path)
 
         with self.output_writer(analysis_dest) as handle:
             for digest, files in sorted(analysis_report.items(),

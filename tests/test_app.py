@@ -24,7 +24,7 @@ def test_dedup_same_dir(subdir_dup: TestDuplicatedSet, temp_appdirs: MockAppDirs
             temp_dir = Path(tmpdir).resolve()
             analysis_dest = temp_dir.joinpath('analysis')
             app._analyze(
-                directory=subdir_dup.reference_dir,
+                directories=[subdir_dup.reference_dir],
                 exclude=None,
                 job_name='test_dedup_same_dir',
                 clear_cache=False,
@@ -64,7 +64,7 @@ def test_dedup_same_dir_ps1(subdir_dup: TestDuplicatedSet, temp_appdirs: MockApp
             temp_dir = Path(tmpdir).resolve()
             analysis_dest = temp_dir.joinpath('analysis')
             app._analyze(
-                directory=subdir_dup.reference_dir,
+                directories=[subdir_dup.reference_dir],
                 exclude=None,
                 job_name='test_dedup_same_dir',
                 clear_cache=False,
