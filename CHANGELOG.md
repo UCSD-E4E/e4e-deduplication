@@ -2,6 +2,15 @@
 
 
 
+## v1.4.0 (2024-01-07)
+
+### Feature
+
+* feat: Adds generate report CLI ([`cdf612c`](https://github.com/UCSD-E4E/e4e-deduplication/commit/cdf612c208f498fe6685e8f2650b3be234ae47da))
+
+* feat: Splits the analysis reporting ([`7ec23d7`](https://github.com/UCSD-E4E/e4e-deduplication/commit/7ec23d7967a20614de7dd0a8ea35e4bf6903654d))
+
+
 ## v1.3.3 (2024-01-07)
 
 ### Fix
