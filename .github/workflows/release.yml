@@ -69,7 +69,9 @@ jobs:
     
         - uses: actions/upload-artifact@v3
           with:
-            path: ./dist/e4e_deduplication*.whl
+            path: |
+              ./dist/e4e_deduplication*.whl
+              ./dedup_ignore.txt
 
   publish:
     runs-on: ubuntu-latest
