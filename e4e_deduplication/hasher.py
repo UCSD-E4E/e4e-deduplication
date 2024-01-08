@@ -1,5 +1,6 @@
 '''File based hashers
 '''
+import logging
 from hashlib import sha256
 from pathlib import Path
 
@@ -13,8 +14,12 @@ def compute_sha256(path: Path) -> str:
     Returns:
         str: Digest
     """
+    logger = logging.getLogger('compute_sha256')
     hasher = sha256()
     with open(path, 'rb') as handle:
-        while blob := handle.read(2*1024*1024):
-            hasher.update(blob)
+        try:
+            while blob := handle.read(2*1024*1024):
+                hasher.update(blob)
+        except OSError:
+            logger.exception(f'Exception when reading from {path}')
     return hasher.hexdigest()
