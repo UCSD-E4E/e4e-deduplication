@@ -6,7 +6,7 @@ import logging
 import re
 import socket
 from pathlib import Path
-from typing import Dict, Set, Tuple
+from typing import Dict, List, Set, Tuple
 
 from tqdm import tqdm
 
@@ -52,13 +52,19 @@ class Analyzer:
             n_bytes=n_bytes)
         hasher.run(working_dir.rglob('*'), n_files)
 
-    def get_duplicates(self) -> Dict[str, Set[Tuple[Path, str]]]:
+    def get_duplicates(self, *,
+                       ignore_hashes: List[str] = None) -> Dict[str, Set[Tuple[Path, str]]]:
         """Return the report of duplicated files
 
         Returns:
             Dict[str, Set[Tuple[Path, str]]]: Dict of digests and corresponding duplicated paths
         """
-        return self.__cache.get_duplicates()
+        report = self.__cache.get_duplicates()
+        if ignore_hashes:
+            for digest in ignore_hashes:
+                if digest in report:
+                    report.pop(digest)
+        return report
 
     def delete(self, working_dir: Path) -> Dict[Path, str]:
         """Deletes any files in the working directory that are duplicated elsewhere in this job.

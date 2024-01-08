@@ -6,6 +6,7 @@ import datetime as dt
 import logging
 import logging.handlers
 import os
+import re
 import shutil
 import socket
 import sys
@@ -13,7 +14,7 @@ import time
 from argparse import ArgumentParser
 from importlib import metadata
 from pathlib import Path
-from typing import Any, List, TextIO
+from typing import Any, List, Optional, TextIO
 
 import semantic_version
 from appdirs import AppDirs
@@ -66,16 +67,24 @@ class Deduplicator:
                             type=str,
                             default='',
                             help='Analysis destination. Defaults to stdout (use "" for stdout)')
+        parser.add_argument('--ignore_hash',
+                            type=str,
+                            required=False,
+                            action='append',
+                            help='Sequence of hashes to ignore')
         parser.set_defaults(func=self._report)
 
     def _report(self,
                 job_name: str,
-                analysis_dest: str):
+                analysis_dest: str,
+                ignore_hash: List[str] = None):
         job_path = Path(self.__app_dirs.user_data_dir, job_name).resolve()
         self.__log.info(f'Generating report for job at {job_path}')
 
         self.__generate_report(analysis_dest=analysis_dest,
-                               job_path=job_path, ignore_pattern=None)
+                               job_path=job_path,
+                               ignore_pattern=None,
+                               ignore_hashes=ignore_hash)
 
     def __configure_drop_tree_parser(self, parser: ArgumentParser):
         parser.add_argument('-j', '--job_name',
@@ -122,6 +131,11 @@ class Deduplicator:
                             type=str,
                             default='',
                             help='Analysis destination. Defaults to stdout (use "" for stdout)')
+        parser.add_argument('--ignore_hash',
+                            type=str,
+                            required=False,
+                            action='append',
+                            help='Sequence of hashes to ignore')
         parser.set_defaults(func=self._analyze)
 
     def _analyze(self,
@@ -129,7 +143,8 @@ class Deduplicator:
                  exclude: Path,
                  job_name: str,
                  clear_cache: bool,
-                 analysis_dest: str):
+                 analysis_dest: str,
+                 ignore_hash: List[str] = None):
         # pylint: disable=too-many-arguments,too-many-locals
         # Required for CLI args, process orchestration
         job_path = Path(self.__app_dirs.user_data_dir, job_name).resolve()
@@ -156,12 +171,17 @@ class Deduplicator:
                     app.clear_cache()
                 app.analyze(working_dir=directory_path)
 
-        self.__generate_report(analysis_dest, job_path, ignore_pattern)
+        self.__generate_report(analysis_dest, job_path,
+                               ignore_pattern, ignore_hashes=ignore_hash)
 
-    def __generate_report(self, analysis_dest, job_path, ignore_pattern):
+    def __generate_report(self,
+                          analysis_dest: str,
+                          job_path: Path,
+                          ignore_pattern: Optional[re.Pattern],
+                          ignore_hashes: List[str] = None):
         with self.output_writer(analysis_dest) as handle, \
                 Analyzer(ignore_pattern=ignore_pattern, job_path=job_path) as app:
-            analysis_report = app.get_duplicates()
+            analysis_report = app.get_duplicates(ignore_hashes=ignore_hashes)
             for digest, files in sorted(analysis_report.items(),
                                         key=lambda x: len(x[1]),
                                         reverse=True):
