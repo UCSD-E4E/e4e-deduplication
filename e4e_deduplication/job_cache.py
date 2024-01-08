@@ -193,7 +193,10 @@ class JobCache:
                 self.__hash_handle.close()
                 self.__hash_handle = open(
                     self.__hash_path, 'w', encoding='utf-8')
-                for line in handle:
+                for line in tqdm(handle,
+                                 total=self.__n_lines,
+                                 desc='Dropping Tree',
+                                 dynamic_ncols=True):
                     if line.strip() == '':
                         continue
                     document = json.loads(line)
