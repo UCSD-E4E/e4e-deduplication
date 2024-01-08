@@ -76,9 +76,9 @@ class PoolMerger:
                     continue
                 part2: Path = queue.get(block=False)
             output_path = part1.parent.joinpath(f'{part1.stem}_{part2.stem}')
-            with open(part1, 'r', encoding='utf-8') as handle1, \
-                open(part2, 'r', encoding='utf-8') as handle2, \
-                    open(output_path, 'w', encoding='utf-8') as output_handle:
+            with open(part1, 'r', encoding='utf-8', newline='\n') as handle1, \
+                open(part2, 'r', encoding='utf-8', newline='\n') as handle2, \
+                    open(output_path, 'w', encoding='utf-8', newline='\n') as output_handle:
                 output_handle.writelines(heap_merge(handle1, handle2))
             part1.unlink()
             part2.unlink()
@@ -104,7 +104,7 @@ def sort_file(src_path: Path, sorted_path: Path) -> None:
             partition_idx = 0
             while lines := src_handle.readlines(partition_size):
                 partition_path = temp_dir.joinpath(f'{partition_idx}')
-                with open(partition_path, 'w', encoding='utf-8') as partition_handle:
+                with open(partition_path, 'w', encoding='utf-8', newline='\n') as partition_handle:
                     partition_handle.writelines(sorted(lines))
                 partition_idx += 1
                 partitions.append(partition_path)

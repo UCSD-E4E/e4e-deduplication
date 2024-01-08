@@ -43,7 +43,8 @@ class JobCache:
         """Opens the cache
         """
         # pylint: disable=consider-using-with
-        self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
+        self.__hash_handle = open(
+            self.__hash_path, 'a+', encoding='utf-8', newline='\n')
         # Resource needs to exist beyond the scope of this function
         self.__rebuild_cache()
         self.__hash_handle.seek(0)
@@ -128,7 +129,8 @@ class JobCache:
             self.__hash_handle.close()
             sort_file(self.__hash_path, self.__hash_path)
             # pylint: disable=consider-using-with
-            self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
+            self.__hash_handle = open(
+                self.__hash_path, 'a+', encoding='utf-8', newline='\n')
             # resource needs to exist beyond the scope of this function
             self.__hash_handle.seek(0)
             self.__rebuild_cache()
@@ -168,7 +170,8 @@ class JobCache:
         self.__hash_handle.close()
         self.__hash_path.unlink()
         # pylint: disable=consider-using-with
-        self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
+        self.__hash_handle = open(
+            self.__hash_path, 'a+', encoding='utf-8', newline='\n')
         # resource needs to exist beyond the scope of this function
         self.__hash_handle.seek(0)
         self.__hash_cache.clear()
@@ -187,12 +190,12 @@ class JobCache:
         with TemporaryDirectory() as tmpdir:
             temp_dir = Path(tmpdir).resolve()
             self.__hash_handle.seek(0)
-            with open(temp_dir.joinpath('hashes.csv'), 'w', encoding='utf-8') as handle:
+            with open(temp_dir.joinpath('hashes.csv'), 'w', encoding='utf-8', newline='\n') as handle:
                 shutil.copyfileobj(self.__hash_handle, handle)
-            with open(temp_dir.joinpath('hashes.csv'), 'r', encoding='utf-8') as handle:
+            with open(temp_dir.joinpath('hashes.csv'), 'r', encoding='utf-8', newline='\n') as handle:
                 self.__hash_handle.close()
                 self.__hash_handle = open(
-                    self.__hash_path, 'w', encoding='utf-8')
+                    self.__hash_path, 'w', encoding='utf-8', newline='\n')
                 for line in tqdm(handle,
                                  total=self.__n_lines,
                                  desc='Dropping Tree',
@@ -209,6 +212,7 @@ class JobCache:
                         self.__hash_handle.write(line)
                         continue
         self.__hash_handle.close()
-        self.__hash_handle = open(self.__hash_path, 'a+', encoding='utf-8')
+        self.__hash_handle = open(
+            self.__hash_path, 'a+', encoding='utf-8', newline='\n')
         self.__hash_handle.seek(0)
         self.__rebuild_cache()
