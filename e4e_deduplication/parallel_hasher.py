@@ -17,7 +17,9 @@ def _hasher(condition: Condition,
             terminate: Event,
             result_queue: Queue,
             result_condition: Condition,
-            hash_fn: Callable[[Path], str]) -> None:
+            hash_fn: Callable[[Path], str],
+            error_queue: Queue) -> None:
+    logger = logging.getLogger('Hasher')
     # pylint: disable=too-many-arguments
     # This is a general hasher
     while True:
@@ -30,7 +32,12 @@ def _hasher(condition: Condition,
             job: Path = job_queue.get(block=False)
         except Empty:
             continue
-        digest = hash_fn(job)
+        try:
+            digest = hash_fn(job)
+        except Exception:  # pylint: disable=broad-except
+            logger.exception('Hash Function emitted exception')
+            error_queue.put(job)
+            continue
         result_queue.put((job, digest))
         with result_condition:
             result_condition.notify()
@@ -76,6 +83,7 @@ class ParallelHasher:
         job_condition = Condition()
         job_queue = Queue()
         result_queue = Queue()
+        error_queue = Queue()
         self._pb = tqdm(total=n_iter, dynamic_ncols=True,
                         desc='Computing Hashes')
         if self._n_bytes:
@@ -96,7 +104,8 @@ class ParallelHasher:
             'terminate': job_terminate,
             'result_queue': result_queue,
             'result_condition': result_condition,
-            'hash_fn': self._hash_fn
+            'hash_fn': self._hash_fn,
+            'error_queue': error_queue
         })
             for _ in range(cpu_count())]
         for process in processes:
