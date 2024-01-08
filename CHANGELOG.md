@@ -2,6 +2,19 @@
 
 
 
+## v1.4.4 (2024-01-08)
+
+### Ci
+
+* ci: Adds dedup ignore to release ([`9d0388c`](https://github.com/UCSD-E4E/e4e-deduplication/commit/9d0388ca7cc2b632b42bf5446477bda4b2b68e29))
+
+### Fix
+
+* fix: Fixes newlines for cross-platform ([`db3aa35`](https://github.com/UCSD-E4E/e4e-deduplication/commit/db3aa35b585eeb5495faa02997b3c201802b2783))
+
+* fix: Updates dedup ignore for google drive ([`303c8aa`](https://github.com/UCSD-E4E/e4e-deduplication/commit/303c8aad0b0fcf97729e2f788f3263cd25a44b97))
+
+
 ## v1.4.3 (2024-01-08)
 
 ### Fix
