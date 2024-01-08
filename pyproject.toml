@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "e4e-deduplication"
-version = "1.4.1"
+version = "1.4.2"
 description = ""
 authors = ["Nathan Hui <nthui@ucsd.edu>"]
 readme = "README.md"

@@ -2,6 +2,13 @@
 
 
 
+## v1.4.2 (2024-01-08)
+
+### Fix
+
+* fix: Adds hash error trap ([`6d09e49`](https://github.com/UCSD-E4E/e4e-deduplication/commit/6d09e491e5eb4a909818942dfbd09d769469a063))
+
+
 ## v1.4.1 (2024-01-08)
 
 ### Fix
