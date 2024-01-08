@@ -2,6 +2,13 @@
 
 
 
+## v1.5.0 (2024-01-08)
+
+### Feature
+
+* feat: Adds ignore hash to CLI ([`ff4d279`](https://github.com/UCSD-E4E/e4e-deduplication/commit/ff4d27981a48f21c2df3ddb9881433778c1b8ac3))
+
+
 ## v1.4.4 (2024-01-08)
 
 ### Ci
