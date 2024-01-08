@@ -2,6 +2,13 @@
 
 
 
+## v1.4.1 (2024-01-08)
+
+### Fix
+
+* fix: Adds progress bar to drop tree ([`a6056d8`](https://github.com/UCSD-E4E/e4e-deduplication/commit/a6056d832690b1da114af663d7d3e783b179b6b1))
+
+
 ## v1.4.0 (2024-01-07)
 
 ### Feature
