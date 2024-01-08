@@ -2,6 +2,17 @@
 
 
 
+## v1.4.3 (2024-01-08)
+
+### Fix
+
+* fix: Adds logging to compute_sha256 ([`ebb80be`](https://github.com/UCSD-E4E/e4e-deduplication/commit/ebb80beba941db0beab0fabf15f171923196c2f2))
+
+### Unknown
+
+* Merge branch &#39;master&#39; of github.com:UCSD-E4E/e4e-deduplication ([`8a41847`](https://github.com/UCSD-E4E/e4e-deduplication/commit/8a418470cbd2a2ff87a83c59314a1d29d00aed32))
+
+
 ## v1.4.2 (2024-01-08)
 
 ### Fix
