@@ -190,9 +190,15 @@ class JobCache:
         with TemporaryDirectory() as tmpdir:
             temp_dir = Path(tmpdir).resolve()
             self.__hash_handle.seek(0)
-            with open(temp_dir.joinpath('hashes.csv'), 'w', encoding='utf-8', newline='\n') as handle:
+            with open(file=temp_dir.joinpath('hashes.csv'),
+                      mode='w',
+                      encoding='utf-8',
+                      newline='\n') as handle:
                 shutil.copyfileobj(self.__hash_handle, handle)
-            with open(temp_dir.joinpath('hashes.csv'), 'r', encoding='utf-8', newline='\n') as handle:
+            with open(file=temp_dir.joinpath('hashes.csv'),
+                      mode='r',
+                      encoding='utf-8',
+                      newline='\n') as handle:
                 self.__hash_handle.close()
                 self.__hash_handle = open(
                     self.__hash_path, 'w', encoding='utf-8', newline='\n')

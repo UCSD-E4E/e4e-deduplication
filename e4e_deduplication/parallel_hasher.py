@@ -19,9 +19,9 @@ def _hasher(condition: Condition,
             result_condition: Condition,
             hash_fn: Callable[[Path], str],
             error_queue: Queue) -> None:
-    logger = logging.getLogger('Hasher')
     # pylint: disable=too-many-arguments
     # This is a general hasher
+    logger = logging.getLogger('Hasher')
     while True:
         with condition:
             if job_queue.empty() and not terminate.is_set():
