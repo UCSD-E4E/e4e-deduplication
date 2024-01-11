@@ -188,7 +188,7 @@ class Deduplicator:
                 handle.write(
                     f'File signature {digest} discovered {len(files)} times:\n'
                 )
-                for file, hostname in files:
+                for file, hostname in sorted(files, key=lambda x: (x[1], x[0])):
                     handle.write(f'\t{hostname}:{file.as_posix()}\n')
 
     def __configure_delete_parser(self, parser: ArgumentParser):
@@ -258,7 +258,7 @@ class Deduplicator:
             del_fmt = shell_delete_map[os_shell_map[os.name]]
 
         with self.output_writer(script_dest.as_posix()) as handle:
-            for file, digest in delete_report.items():
+            for file, digest in sorted(delete_report.items()):
                 handle.write(del_fmt.format(
                     path=str(file), digest=digest) + '\n')
 
