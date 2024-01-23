@@ -2,6 +2,25 @@
 
 
 
+## v1.5.1 (2024-01-23)
+
+### Ci
+
+* ci: Fixes release ([`aee279c`](https://github.com/UCSD-E4E/e4e-deduplication/commit/aee279c39471ce990f37e9287b36d7f54ebba2bc))
+
+* ci: Fixes dist ([`62eba04`](https://github.com/UCSD-E4E/e4e-deduplication/commit/62eba04c6c56f4001ab3e10cd262bd38429cba24))
+
+* ci: Fixes sort test ([`0a8e809`](https://github.com/UCSD-E4E/e4e-deduplication/commit/0a8e809b491a381ab8f787b0f43dfabd713b4a04))
+
+### Fix
+
+* fix: Adds quotes to delete scripts ([`061700d`](https://github.com/UCSD-E4E/e4e-deduplication/commit/061700d60f0a4dafb3827b864e9d496d53c78f12))
+
+### Style
+
+* style: Fixes style issues ([`1e31875`](https://github.com/UCSD-E4E/e4e-deduplication/commit/1e31875912cb0023d0712a267fb92eb9700a367e))
+
+
 ## v1.5.0 (2024-01-08)
 
 ### Feature
