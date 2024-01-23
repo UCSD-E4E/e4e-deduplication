@@ -248,9 +248,9 @@ class Deduplicator:
             'nt': 'cmd'
         }
         shell_delete_map = {
-            'cmd': 'del /f {path} &:: {digest}',
-            'ps': 'Remove-Item -Path {path} -Force # {digest}',
-            'sh': 'rm -f {path} # {digest}'
+            'cmd': 'del /f "{path}" &:: {digest}',
+            'ps': 'Remove-Item -Path "{path}" -Force # {digest}',
+            'sh': 'rm -f "{path}" # {digest}'
         }
         if shell:
             del_fmt = shell_delete_map[shell]
