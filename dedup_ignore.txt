@@ -64,3 +64,5 @@ ehthumbs_vista\.db
 # google drive
 .*\.gsheet
 .*\.gdoc
+.*\.gslides
+.*\.gform
