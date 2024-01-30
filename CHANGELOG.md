@@ -2,6 +2,13 @@
 
 
 
+## v1.5.2 (2024-01-30)
+
+### Fix
+
+* fix: Adds gslides and gform ([`f449511`](https://github.com/UCSD-E4E/e4e-deduplication/commit/f44951170047487aa67311d3e955f803e3aea11a))
+
+
 ## v1.5.1 (2024-01-23)
 
 ### Ci
