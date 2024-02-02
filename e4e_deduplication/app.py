@@ -150,6 +150,13 @@ class Deduplicator:
         job_path = Path(self.__app_dirs.user_data_dir, job_name).resolve()
         self.__log.info(f'Using job path {job_path}')
 
+        bad_dirs = []
+        for directory in directories:
+            if not directory.is_dir():
+                bad_dirs.append(directory)
+        if len(bad_dirs) > 0:
+            raise FileNotFoundError(f'Unknown directories {bad_dirs}')
+
         for directory in directories:
             directory_path = directory.resolve()
             self.__log.info(f'Walking path {directory_path}')
