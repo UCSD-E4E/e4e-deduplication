@@ -2,6 +2,13 @@
 
 
 
+## v1.5.3 (2024-02-02)
+
+### Fix
+
+* fix: Adds gdraw ([`f871521`](https://github.com/UCSD-E4E/e4e-deduplication/commit/f87152129f2e2ff19ee23a73c21fab75b6192114))
+
+
 ## v1.5.2 (2024-01-30)
 
 ### Fix
