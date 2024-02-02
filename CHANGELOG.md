@@ -2,6 +2,17 @@
 
 
 
+## v1.5.4 (2024-02-02)
+
+### Documentation
+
+* docs: Updates README ([`d7a77fd`](https://github.com/UCSD-E4E/e4e-deduplication/commit/d7a77fd572c211177d99ed653c9ac3af438cceeb))
+
+### Fix
+
+* fix: Adds fast directory check ([`db2e33c`](https://github.com/UCSD-E4E/e4e-deduplication/commit/db2e33c60c9095706b711f77ae1adf7d1d385454))
+
+
 ## v1.5.3 (2024-02-02)
 
 ### Fix
