@@ -66,3 +66,4 @@ ehthumbs_vista\.db
 .*\.gdoc
 .*\.gslides
 .*\.gform
+.*\.gdraw
