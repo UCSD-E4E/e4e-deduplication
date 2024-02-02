@@ -16,20 +16,20 @@ python -m pip install .
 
 ## How to execute
 ```
-usage: e4e_deduplication [-h] [--version] {analyze,delete,upgrade_cache,export_cache,info} ...
+usage: e4e_deduplication [-h] [--version] {analyze,delete,export_cache,import_cache,list_jobs,drop_tree,report} ...
 
 positional arguments:
-  {analyze,delete,upgrade_cache,export_cache,info}
+  {analyze,delete,export_cache,import_cache,list_jobs,drop_tree,report}
 
 options:
   -h, --help            show this help message and exit
   --version             show program's version number and exit
 
-usage: e4e_deduplication analyze [-h] -d DIRECTORY [-e EXCLUDE] -j JOB_NAME [--clear_cache] [-a ANALYSIS_DEST]
+usage: e4e_deduplication analyze [-h] -d DIRECTORIES [-e EXCLUDE] -j JOB_NAME [--clear_cache] [-a ANALYSIS_DEST] [--ignore_hash IGNORE_HASH]
 
 options:
   -h, --help            show this help message and exit
-  -d DIRECTORY, --directory DIRECTORY
+  -d DIRECTORIES, --directory DIRECTORIES
                         The directory to work on
   -e EXCLUDE, --exclude EXCLUDE
                         Path to ignore file of absolute path regex patterns to exclude.
@@ -38,6 +38,8 @@ options:
   --clear_cache         Clears the job cache.
   -a ANALYSIS_DEST, --analysis_dest ANALYSIS_DEST
                         Analysis destination. Defaults to stdout (use "" for stdout)
+  --ignore_hash IGNORE_HASH
+                        Sequence of hashes to ignore
 
 usage: e4e_deduplication delete [-h] -d DIRECTORY [-e EXCLUDE] -j JOB_NAME -s SCRIPT_DEST [--shell {cmd,ps,sh}]
 
