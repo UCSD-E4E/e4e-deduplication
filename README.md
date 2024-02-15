@@ -97,3 +97,13 @@ To upgrade a hostname agnostic job cache:
 ```
 e4e_deduplication_config upgrade_cache -j test_job 
 ```
+
+If we need to deduplicate a directory on a client (dronelab-nathan.ucsd.edu) against multiple directories on a server (e4e-nas.ucsd.edu):
+```
+nthui@e4e-nas:~$ e4e_deduplication analyze -e ./dedup_ignore.txt -j job_name -a analysis_report.txt -d server_dir1 -d server_dir2 -d server_dir3
+nthui@e4e-nas:~$ e4e_deduplication export_cache -j job_name -o cache_export.csv
+nthui@dronelab-nathan:~$ scp nthui@e4e-nas.ucsd.edu:~/cache_export.csv ./cache_export.csv
+nthui@dronelab-nathan:~$ e4e_deduplication import_cache -i cache_export.csv -n job_name
+nthui@dronelab-nathan:~$ e4e_deduplication delete -j job_name -e ./dedup_ignore.txt -s delete.cmd -d client_dir1
+nthui@dronelab-nathan:~$ ./delete.cmd
+```
