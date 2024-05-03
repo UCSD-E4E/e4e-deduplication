@@ -9,7 +9,7 @@ packages = [{include = "e4e_deduplication"}]
 [tool.poetry.dependencies]
 python = "^3.9"
 appdirs = "^1.4.4"
-tqdm = "^4.66.1"
+tqdm = "^4.66.3"
 semantic-version = "^2.10.0"
 
 [tool.poetry.group.dev.dependencies]
