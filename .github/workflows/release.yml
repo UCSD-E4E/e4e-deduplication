@@ -13,18 +13,19 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
         submodules: recursive
         ref: master
+        token: ${{ secrets.RELEASER }}
 
 
     - name: Python Semantic Release
-      uses: python-semantic-release/python-semantic-release@master
+      uses: python-semantic-release/python-semantic-release@v9
       id: release
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.RELEASER }}
         root_options: "-vv"
     outputs:
       release: ${{ steps.release.outputs.released }}
@@ -46,7 +47,7 @@ jobs:
             ref: master
       
         # Used to host cibuildwheel
-        - uses: actions/setup-python@v3
+        - uses: actions/setup-python@v5
           with:
             python-version: ${{ matrix.python-version }}
 
@@ -67,7 +68,7 @@ jobs:
         - name: Build wheels
           run: python -m pip wheel -w dist .
     
-        - uses: actions/upload-artifact@v3
+        - uses: actions/upload-artifact@v4
           with:
             path: |
               ./dist/e4e_deduplication*.whl
@@ -80,11 +81,12 @@ jobs:
       id-token: write
       contents: write
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
         submodules: recursive
         ref: master
+        token: ${{ secrets.RELEASER }}
 
     - uses: actions/download-artifact@v4.1.7
       with:
@@ -98,4 +100,4 @@ jobs:
       id: github-release
       uses: python-semantic-release/upload-to-gh-release@main
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.RELEASER }}
